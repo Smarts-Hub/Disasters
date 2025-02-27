@@ -1,0 +1,16 @@
+database:
+  # Available drivers: h2, mysql
+  driver: h2
+  host: 101.101.101.101
+  port: 3306
+  db-name: disasters
+  username: userNaMeForDisasters
+  password: passw0rD
+
+lobby:
+  world: world
+  x: 0
+  y: 64
+  z: 0
+  yaw: 0
+  pitch: 0

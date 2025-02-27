@@ -1,0 +1,50 @@
+# This is an example arena file. You can create as many arenas as you want.
+# The name of the file is the name of the arena. In this case, the name of the arena is "example_arena".
+# The name of the arena is used to reference the arena in the plugin, so make sure it's unique.
+
+# max-players refers to the maximum number of players that can join and play the arena.
+max-players: 10
+
+# min-players refers to the minimum number of players required to start the arena.
+min-players: 2
+
+# alive-to-end refers to the number of players that need to be alive for the arena to end.
+alive-to-end: 1
+
+# countdown refers to the number of seconds before the arena starts, after the minimum number of players have joined.
+# is the time that the arena will wait players to join before games starts.
+countdown: 10
+
+# game-time refers to the number of seconds that the arena will last.
+game-time: 300
+
+# disaster-rate is the time in seconds between disasters.
+disaster-rate: 30
+
+# max-disasters is the maximum number of disasters that can happen in the arena at the same time.
+max-disasters: 4
+
+# display-name refers to the name of the arena that will be displayed in the placeholder.
+display-name: "<rainbow>Example Arena"
+
+# spawn is the location where the players will spawn when they join the arena.
+spawn:
+  x: 0
+  y: 0
+  z: 0
+  yaw: 0
+  pitch: 0
+  world: world
+
+# corner1 and corner2 are the locations that define the arena region.
+corner1:
+  x: 0
+  y: 0
+  z: 0
+  world: world
+
+corner2:
+  x: 0
+  y: 0
+  z: 0
+  world: world

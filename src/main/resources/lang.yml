@@ -1,0 +1,65 @@
+messages:
+  no-permission: "<red>You do not have permission to perform this!"
+
+countdown:
+  10:
+    title: "<rainbow>Starting in 10 seconds!"
+    subtitle: "<rainbow>Get ready!"
+  5:
+    title: "<rainbow>Starting in 5 seconds!"
+    subtitle: "<rainbow>Get ready!"
+  4:
+    title: "<rainbow>Starting in 4 seconds!"
+    subtitle: "<rainbow>Get ready!"
+  3:
+    title: "<rainbow>Starting in 3 seconds!"
+    subtitle: "<rainbow>Get ready!"
+  2:
+    title: "<rainbow>Starting in 2 seconds!"
+    subtitle: "<rainbow>Get ready!"
+  1:
+    title: "<rainbow>Starting in 1 second!"
+    subtitle: "<rainbow>Get ready!"
+
+game-start:
+  title: "<rainbow>Game has started!"
+  subtitle: "<rainbow>Good luck!"
+
+game-end:
+  title: "<rainbow>Game has ended!"
+  subtitle: "<rainbow>Thanks for playing!"
+
+disaster:
+  acid-rain:
+    title: "<red>Acid Rain!"
+    subtitle: "<red>Take cover!"
+  apocalypse:
+    title: "<red>Apocalypse!"
+    subtitle: "<red>Run for your life!"
+  explosive-sheep:
+    title: "<red>Explosive Sheep!"
+    subtitle: "<red>Watch out!"
+  floor-is-lava:
+    title: "<red>Floor is Lava!"
+    subtitle: "<red>Don't touch the ground!"
+  grounded:
+    title: "<red>Grounded!"
+    subtitle: "<red>Stay on the ground!"
+  lightning:
+    title: "<red>Lightning!"
+    subtitle: "<red>Take cover!"
+  murder:
+    title: ""
+    subtitle: ""
+  one-hearth:
+    title: ""
+    subtitle: ""
+  swap:
+    title: ""
+    subtitle: ""
+  tnt-tag:
+    title: ""
+    subtitle: ""
+  world-border:
+    title: ""
+    subtitle: ""
