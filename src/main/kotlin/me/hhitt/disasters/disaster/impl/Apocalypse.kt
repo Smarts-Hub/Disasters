@@ -2,6 +2,7 @@ package me.hhitt.disasters.disaster.impl
 
 import me.hhitt.disasters.arena.Arena
 import me.hhitt.disasters.disaster.Disaster
+import me.hhitt.disasters.util.Notify
 
 import org.bukkit.Location
 import org.bukkit.Material
@@ -16,9 +17,11 @@ class Apocalypse: Disaster {
 
     override fun start(arena: Arena) {
         arenas.add(arena)
+        Notify.disaster(arena, "apocalypse")
     }
 
-    override fun pulse() {
+    override fun pulse(time: Int) {
+        if(time % 2 != 0) return
         arenas.forEach { arena ->
             arena.alive.forEach { player ->
                 spawnZombiesNearPlayer(player, 10, 2)

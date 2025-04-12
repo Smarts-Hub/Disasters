@@ -1,5 +1,21 @@
 messages:
   no-permission: "<red>You do not have permission to perform this!"
+  reload-success: "<green>Plugin reloaded (configuration and arenas)!"
+  lobby-set: "<green>Lobby set!"
+  already-in-arena: "<red>You are already in an arena!"
+  not-in-arena: "<red>You are not in an arena!"
+  arena-not-found: "<red>Arena not found!"
+  arena-in-game: "<red>Arena is in game!"
+  arena-full: "<red>Arena is full!"
+  arena-joined: "<green>You have joined the arena!"
+  arena-left: "<red>You have left the arena!"
+
+game-broadcast:
+  player-joined: "<green>%joined% has joined the game! (%disasters_game_players%/%disasters_game_max_players%)"
+  player-left: "<red>%left% has left the game! (%disasters_game_players%/%disasters_game_max_players%)"
+  player-killed: "<red>%player_name% has been killed by %killer%!"
+  player-died: "<red>%dead% has died!"
+  player-won: "<green>%winner% has won the game!"
 
 countdown:
   10:
@@ -29,37 +45,75 @@ game-end:
   title: "<rainbow>Game has ended!"
   subtitle: "<rainbow>Thanks for playing!"
 
+countdown-canceled:
+  title: "<red>Countdown has been canceled!"
+  subtitle: "<red>Game will not start, please wait!"
+
 disaster:
   acid-rain:
     title: "<red>Acid Rain!"
     subtitle: "<red>Take cover!"
+    chat:
+      - "<gold>----------------------------------"
+      - "<red>Acid Rain is falling from the sky!"
+      - "<red>Take cover!"
+      - "<gold>----------------------------------"
+
   apocalypse:
     title: "<red>Apocalypse!"
     subtitle: "<red>Run for your life!"
+    chat:
+      - "<gold>----------------------------------"
+      - "<red>Apocalypse is happening!"
+      - "<gold>----------------------------------"
+
   explosive-sheep:
     title: "<red>Explosive Sheep!"
     subtitle: "<red>Watch out!"
+    chat:
+      - "<gold>----------------------------------"
+      - "<red>Explosive Sheep are spawning!"
+      - "<gold>----------------------------------"
+
   floor-is-lava:
     title: "<red>Floor is Lava!"
     subtitle: "<red>Don't touch the ground!"
+    chat:
+      - "<gold>----------------------------------"
+      - "<red>Floor is Lava!"
+      - "<gold>----------------------------------"
   grounded:
     title: "<red>Grounded!"
     subtitle: "<red>Stay on the ground!"
+    chat:
+      - "<gold>----------------------------------"
+      - "<red>Grounded! You can't jump!"
+      - "<gold>----------------------------------"
   lightning:
     title: "<red>Lightning!"
     subtitle: "<red>Take cover!"
-  murder:
-    title: ""
-    subtitle: ""
+    chat:
+      - "<gold>----------------------------------"
+      - "<red>Take cover!"
+      - "<gold>----------------------------------"
   one-hearth:
-    title: ""
-    subtitle: ""
+    title: "<red>One Hearth!"
+    subtitle: "<red>Don't get hit!"
+    chat:
+      - "<gold>----------------------------------"
+      - "<red>One Hearth! Don't get hit!"
+      - "<gold>----------------------------------"
   swap:
-    title: ""
-    subtitle: ""
-  tnt-tag:
-    title: ""
-    subtitle: ""
+    title: "<red>Swap!"
+    subtitle: "<red>Switch places!"
+    chat:
+      - "<gold>----------------------------------"
+      - "<red>Swap! Switch places!"
+      - "<gold>----------------------------------"
   world-border:
-    title: ""
-    subtitle: ""
+    title: "<red>World Border!"
+    subtitle: "<red>Run to the center!"
+    chat:
+      - "<gold>----------------------------------"
+      - "<red>World Border is shrinking!"
+      - "<gold>----------------------------------"

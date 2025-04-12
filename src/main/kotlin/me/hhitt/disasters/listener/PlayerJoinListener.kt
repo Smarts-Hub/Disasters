@@ -8,7 +8,7 @@ import org.bukkit.event.player.PlayerJoinEvent
 class PlayerJoinListener: Listener {
 
     @EventHandler
-    suspend fun onPlayerLeave(event: PlayerJoinEvent) {
+    suspend fun onPlayerJoin(event: PlayerJoinEvent) {
         Data.createPlayerStats(event.player.uniqueId)
         Data.loadPlayerAtCache(event.player.uniqueId)
     }

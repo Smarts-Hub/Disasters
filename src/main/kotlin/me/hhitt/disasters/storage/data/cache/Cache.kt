@@ -4,6 +4,12 @@ import me.hhitt.disasters.storage.data.PlayerStats
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
+/**
+ * Cache class to store player statistics in memory.
+ * This is a simple in-memory cache that uses a ConcurrentHashMap to store player statistics.
+ * It is not persistent and will be cleared when the server restarts.
+ */
+
 class Cache {
     private val playerStatsCache = ConcurrentHashMap<UUID, PlayerStats>()
 

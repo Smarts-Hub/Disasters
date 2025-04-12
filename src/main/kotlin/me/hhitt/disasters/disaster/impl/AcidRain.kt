@@ -2,6 +2,7 @@ package me.hhitt.disasters.disaster.impl
 
 import me.hhitt.disasters.arena.Arena
 import me.hhitt.disasters.disaster.Disaster
+import me.hhitt.disasters.util.Notify
 import org.bukkit.Material
 import org.bukkit.WeatherType
 import org.bukkit.block.Block
@@ -17,14 +18,16 @@ class AcidRain: Disaster {
             player.handle.connection.player.setPlayerWeather(WeatherType.DOWNFALL, true)
         }
         arenas.add(arena)
+        Notify.disaster(arena, "acid-rain")
+
     }
 
-    override fun pulse() {
+    override fun pulse(time: Int) {
         arenas.forEach {
             it.alive.forEach {
                 val player: CraftPlayer = it as CraftPlayer
                 if(!isCoveredAndBreak(player.location.block)) {
-                    player.damage(0.5)
+                    player.damage(1.0)
                 }
             }
         }

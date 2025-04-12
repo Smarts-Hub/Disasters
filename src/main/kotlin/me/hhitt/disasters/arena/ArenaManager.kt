@@ -1,18 +1,44 @@
 package me.hhitt.disasters.arena
 
+import com.sk89q.worldedit.bukkit.WorldEditPlugin
 import me.hhitt.disasters.Disasters
+import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Player
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 
-class ArenaManager {
+/**
+ * ArenaManager is responsible for managing all arenas in the game.
+ * It loads arenas from the configuration files and provides methods to interact with them.
+ *
+ * @property worldEdit The WorldEdit plugin instance, if available.
+ */
+
+class ArenaManager(private val worldEdit: WorldEditPlugin?) {
 
     private val plugin = Disasters.getInstance()
     private val arenas = mutableListOf<Arena>()
 
     init {
+        createDefaultArenaFile()
         loadArenas()
+    }
+
+    private fun createDefaultArenaFile() {
+        val arenasFolder = File(plugin.dataFolder, "Arenas")
+        if (!arenasFolder.exists()) {
+            arenasFolder.mkdirs()
+        }
+
+        val arenaFile = File(arenasFolder, "example_arena.yml")
+        if (!arenaFile.exists()) {
+            plugin.getResource("example_arena.yml")?.use { inputStream ->
+                Files.copy(inputStream, arenaFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
+            }
+        }
     }
 
     private fun loadArenas() {
@@ -43,27 +69,27 @@ class ArenaManager {
             val maxDisasters = arenaConfig.getInt("max-disasters")
             val displayName = arenaConfig.getString("display-name")!!
             val location = Location(
-                plugin.server.getWorld(arenaConfig.getString("world")!!),
-                arenaConfig.getDouble("x"),
-                arenaConfig.getDouble("y"),
-                arenaConfig.getDouble("z"),
-                arenaConfig.getInt("yaw").toFloat(),
-                arenaConfig.getInt("pitch").toFloat()
+                Bukkit.getWorld(arenaConfig.getString("spawn.world")!!),
+                arenaConfig.getDouble("spawn.x"),
+                arenaConfig.getDouble("spawn.y"),
+                arenaConfig.getDouble("spawn.z"),
+                arenaConfig.getInt("spawn.yaw").toFloat(),
+                arenaConfig.getInt("spawn.pitch").toFloat()
             )
             val corner1 = Location(
-                plugin.server.getWorld(arenaConfig.getString("world")!!),
+                plugin.server.getWorld(arenaConfig.getString("corner1.world")!!),
                 arenaConfig.getDouble("corner1.x"),
                 arenaConfig.getDouble("corner1.y"),
                 arenaConfig.getDouble("corner1.z")
             )
             val corner2 = Location(
-                plugin.server.getWorld(arenaConfig.getString("world")!!),
+                plugin.server.getWorld(arenaConfig.getString("corner2.world")!!),
                 arenaConfig.getDouble("corner2.x"),
                 arenaConfig.getDouble("corner2.y"),
                 arenaConfig.getDouble("corner2.z")
             )
 
-            val arena = Arena(arenaID, displayName, minPlayers, maxPlayers, aliveToEnd, gameTime, countdown, disasterRate, maxDisasters, location, corner1, corner2)
+            val arena = Arena(arenaID, displayName, minPlayers, maxPlayers, aliveToEnd, gameTime, countdown, disasterRate, maxDisasters, location, corner1, corner2, worldEdit)
 
             arenas.add(arena)
         }
@@ -97,6 +123,11 @@ class ArenaManager {
     fun removeArena(arenaID: String): Boolean {
         val arena = getArena(arenaID) ?: return false
         return arenas.remove(arena)
+    }
+
+    fun reloadArenas() {
+        arenas.clear()
+        loadArenas()
     }
 
 }

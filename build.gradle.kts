@@ -4,10 +4,11 @@ plugins {
     kotlin("jvm") version "2.1.20-RC"
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.14"
+    id("io.github.revxrsal.zapper") version "1.0.3"
 }
 
 group = "me.hhitt"
-version = "1.0.0-SNAPSHOT"
+version = "1.0.1"
 
 repositories {
     mavenCentral()
@@ -27,20 +28,39 @@ repositories {
 
     maven { url = uri("https://repo.codemc.io/repository/maven-snapshots/") }
 
+    maven { url = uri("https://jitpack.io") }
+
 }
 
 dependencies {
     paperweight.paperDevBundle("1.21.4-R0.1-SNAPSHOT")
     compileOnly ("me.clip:placeholderapi:2.11.6")
     compileOnly ("com.sk89q.worldedit:worldedit-bukkit:7.3.0")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("com.h2database:h2:2.2.220")
-    implementation(kotlin("stdlib"))
-    implementation("org.jetbrains.exposed:exposed-core:0.57.0")
-    implementation("org.jetbrains.exposed:exposed-dao:0.57.0")
-    implementation("org.jetbrains.exposed:exposed-jdbc:0.57.0")
-    implementation("io.github.revxrsal:lamp.common:4.0.0-beta.25")
-    implementation("io.github.revxrsal:lamp.bukkit:4.0.0-beta.25")
+    runtimeOnly("com.github.radioegor146.native-obfuscator:annotations:3.5.4r")
+    zap("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    zap("com.h2database:h2:2.2.220")
+    zap(kotlin("stdlib"))
+    zap("org.jetbrains.exposed:exposed-core:0.57.0")
+    zap("org.jetbrains.exposed:exposed-dao:0.57.0")
+    zap("org.jetbrains.exposed:exposed-jdbc:0.57.0")
+    zap("io.github.revxrsal:lamp.common:4.0.0-beta.25")
+    zap("io.github.revxrsal:lamp.bukkit:4.0.0-beta.25")
+    zap("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.21.0")
+    zap("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.21.0")
+
+    val scoreboardLibraryVersion = "2.2.2"
+    zap("net.megavex:scoreboard-library-api:$scoreboardLibraryVersion")
+    zap("net.megavex:scoreboard-library-extra-kotlin:$scoreboardLibraryVersion")
+    runtimeOnly("net.megavex:scoreboard-library-implementation:$scoreboardLibraryVersion")
+    runtimeOnly("net.megavex:scoreboard-library-modern:$scoreboardLibraryVersion:mojmap")
+
+
+}
+
+
+zapper {
+    libsFolder = "libs"
+    repositories { includeProjectRepositories() }
 }
 
 val targetJavaVersion = 21
@@ -70,4 +90,9 @@ tasks.withType<KotlinJvmCompile> {
     compilerOptions {
         javaParameters = true
     }
+}
+
+tasks.register<Copy>("copyDeps") {
+    from(configurations.runtimeOnly)
+    into("/home/diego/Desktop/libs")
 }

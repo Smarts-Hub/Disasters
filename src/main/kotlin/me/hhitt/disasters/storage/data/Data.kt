@@ -4,9 +4,20 @@ import me.hhitt.disasters.storage.data.cache.Cache
 import me.hhitt.disasters.storage.data.database.PlayerStatsDAO
 import java.util.UUID
 
+/**
+ * Data class to manage player statistics.
+ * This class is responsible for loading, updating, and retrieving player statistics.
+ * It uses a cache to store player statistics for quick access.
+ */
+
 object Data {
-    private val cache = Cache()
-    private val playerStatsDAO = PlayerStatsDAO(cache)
+    private lateinit var cache: Cache
+    private lateinit var playerStatsDAO: PlayerStatsDAO
+
+    fun load() {
+        cache = Cache()
+        playerStatsDAO = PlayerStatsDAO(cache)
+    }
 
 
     suspend fun increaseWins(playerId: UUID) {
@@ -22,6 +33,18 @@ object Data {
     suspend fun increaseTotalPlayed(playerId: UUID) {
         val stats = getPlayerStats(playerId)
         updatePlayerStats(playerId, stats.copy(totalPlayed = stats.totalPlayed + 1))
+    }
+
+    fun getWinsFromCache(playerId: UUID): Int {
+        return cache.getPlayerStats(playerId)?.wins ?: 0
+    }
+
+    fun getDefeatsFromCache(playerId: UUID): Int {
+        return cache.getPlayerStats(playerId)?.defeats ?: 0
+    }
+
+    fun getTotalPlayedFromCache(playerId: UUID): Int {
+        return cache.getPlayerStats(playerId)?.totalPlayed ?: 0
     }
 
     suspend fun getWins(playerId: UUID): Int {

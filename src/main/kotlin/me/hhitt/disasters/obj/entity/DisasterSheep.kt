@@ -8,14 +8,24 @@ import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.entity.TNTPrimed
 
+/**
+ * DisasterSheep is a class that represents a sheep entity that changes color and explodes
+ * in a sequence of colors: green, orange, and red. After the red color, it spawns a TNT explosion.
+ *
+ * @param entityType The type of the entity (Sheep).
+ * @param level The level where the entity is spawned.
+ * @param location The location where the entity is spawned.
+ */
+
 class DisasterSheep(entityType: EntityType<out Sheep>, level: Level, location: Location): Sheep(entityType, level) {
 
-    var tick: Int = 3
+    private var tick: Int = 3
 
     init {
         this.isInvulnerable = true
         this.color = DyeColor.GREEN
         this.setPos(location.x, location.y, location.z)
+        this.isNoAi = true
     }
 
     fun call() {
@@ -23,17 +33,14 @@ class DisasterSheep(entityType: EntityType<out Sheep>, level: Level, location: L
         when(tick) {
             3 -> {
                 this.color = DyeColor.GREEN
-                playAttackSound()
                 tick--
             }
             2 -> {
                 this.color = DyeColor.ORANGE
-                playAttackSound()
                 tick--
             }
             1 -> {
                 this.color = DyeColor.RED
-                playAttackSound()
                 tick--
             }
             0 -> {

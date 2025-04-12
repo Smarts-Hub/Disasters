@@ -1,0 +1,47 @@
+lobby:
+  title: "<gold><bold>Disasters"
+  lines:
+    - ""
+    - "<gray>Games: <white>%disasters_total_played%"
+    - "<gray>Wins: <white>%disasters_wins%"
+    - "<gray>Defeats: <white>%disasters_defeats%"
+    - ""
+    - "<blue>play.example.com"
+
+recruiting:
+  title: "<gold><bold>Disasters"
+  lines:
+    - ""
+    - "<gray>Waiting for players..."
+    - "<gray>Players: <white>%disasters_game_players%"
+    - "<gray>Arena: %disasters_arena%"
+    - ""
+    - "<blue>play.example.com"
+
+countdown:
+  title: "<gold><bold>Disasters"
+  lines:
+    - ""
+    - "<gray>Starting in <white>%disasters_countdown_time%<gray>..."
+    - "<gray>Players: <white>%disasters_game_players%<gray>/<red>%disasters_game_max_players%"
+    - ""
+    - "<blue>play.example.com"
+
+live:
+  title: "<gold><bold>Disasters"
+  lines:
+    - ""
+    - "<gray>Game started!"
+    - "<gray>Players: <white>%disasters_players%"
+    - "<gray>Time: <white>%disasters_game_time_left%"
+    - ""
+    - ""
+    - "<blue>play.example.com"
+
+restarting:
+  title: "<gold><bold>Disasters"
+  lines:
+    - ""
+    - "<gray>Game ended!"
+    - ""
+    - "<blue>play.example.com"

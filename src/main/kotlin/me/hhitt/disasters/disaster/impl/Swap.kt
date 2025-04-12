@@ -2,6 +2,7 @@ package me.hhitt.disasters.disaster.impl
 
 import me.hhitt.disasters.arena.Arena
 import me.hhitt.disasters.disaster.Disaster
+import me.hhitt.disasters.util.Notify
 
 class Swap : Disaster {
 
@@ -9,9 +10,13 @@ class Swap : Disaster {
 
     override fun start(arena: Arena) {
         arenas.add(arena)
+        Notify.disaster(arena, "swap")
     }
 
-    override fun pulse() {
+    override fun pulse(time: Int) {
+
+        if(time % 10 != 0) return
+
         arenas.forEach {
             val players = it.alive
             players.shuffle()

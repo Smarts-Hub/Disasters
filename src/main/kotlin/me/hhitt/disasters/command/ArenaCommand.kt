@@ -1,12 +1,22 @@
 package me.hhitt.disasters.command
 
 import me.hhitt.disasters.arena.ArenaManager
+import me.hhitt.disasters.storage.file.FileManager
+import me.hhitt.disasters.util.Msg
 import revxrsal.commands.annotation.Command
 import revxrsal.commands.annotation.Subcommand
 import revxrsal.commands.bukkit.actor.BukkitCommandActor
 
+/**
+ * ArenaCommand class that handles the commands related to arena prefix.
+ *
+ * @param arenaManager The ArenaManager instance used to manage arenas.
+ */
+
 @Command("arena")
 class ArenaCommand(private val arenaManager: ArenaManager) {
+
+    private val lang = FileManager.get("lang")!!
 
     @Subcommand("join <arena>")
     fun join(actor: BukkitCommandActor, arena: String) {
@@ -14,23 +24,41 @@ class ArenaCommand(private val arenaManager: ArenaManager) {
         if(!actor.isPlayer) return
         val player = actor.asPlayer()!!
 
+        arenaManager.getArena(player)?.let {
+            Msg.send(player, "already-in-arena")
+            return
+        }
+
         // Getting the arena from the ArenaManager
         arenaManager.getArena(arena)?.let {
             // Checking if the arena is full
             if(it.isFull()){
-                player.sendMessage("§cThat arena is full.")
+                Msg.send(player, "arena-full")
                 return
             }
             // Checking if it is recruiting or counting down
             if(!it.isWaiting()){
-                player.sendMessage("§cThat arena is not waiting for players.")
+                Msg.send(player, "arena-in-game")
                 return
             }
             it.addPlayer(player)
         } ?: run {
             // If the arena does not exist
-            player.sendMessage("§cThat arena does not exist.")
+            Msg.send(player, "arena-not-found")
         }
+    }
+
+    @Subcommand("quickjoin")
+    fun quickJoin(actor: BukkitCommandActor) {
+        if(!actor.isPlayer) return
+        val player = actor.asPlayer()!!
+
+        arenaManager.getArena(player)?.let {
+            Msg.send(player, "already-in-arena")
+            return
+        }
+
+        arenaManager.addPlayerToBestArena(player)
     }
 
     @Subcommand("leave")
@@ -40,10 +68,8 @@ class ArenaCommand(private val arenaManager: ArenaManager) {
         val player = actor.asPlayer()!!
 
         // Getting the arena from the ArenaManager
-        arenaManager.getArena(player)?.let {
-            it.removePlayer(player)
-        } ?: run {
-            player.sendMessage("§cYou are not in an arena.")
+        arenaManager.getArena(player)?.removePlayer(player) ?: run {
+            Msg.send(player, "not-in-arena")
         }
     }
 
@@ -57,13 +83,14 @@ class ArenaCommand(private val arenaManager: ArenaManager) {
         arenaManager.getArena(player)?.let {
             // Checking if the player has permission
             if(!player.hasPermission("disasters.forcestart")){
-                player.sendMessage("§cYou do not have permission to do that.")
+                Msg.send(player, "no-permission")
+
                 return
             }
             it.start()
         } ?: run {
             // If the arena does not exist
-            player.sendMessage("§cYou are not in an arena.")
+            Msg.send(player, "not-in-arena")
         }
     }
 
@@ -77,13 +104,13 @@ class ArenaCommand(private val arenaManager: ArenaManager) {
         arenaManager.getArena(player)?.let {
             // Checking if the player has permission
             if(!player.hasPermission("disasters.forcestop")){
-                player.sendMessage("§cYou do not have permission to do that.")
+                Msg.send(player, "no-permission")
                 return
             }
             it.stop()
         } ?: run {
             // If the arena does not exist
-            player.sendMessage("§cYou are not in an arena.")
+            Msg.send(player, "not-in-arena")
         }
     }
 
@@ -95,13 +122,13 @@ class ArenaCommand(private val arenaManager: ArenaManager) {
         arenaManager.getArena(arena)?.let {
             // Checking if the player has permission
             if(!sender.hasPermission("disasters.forcestart")){
-                sender.sendMessage("§cYou do not have permission to do that.")
+                Msg.send(sender, "no-permission")
                 return
             }
             it.start()
         } ?: run {
             // If the arena does not exist
-            sender.sendMessage("§cThat arena does not exist.")
+            Msg.send(sender, "arena-not-found")
         }
     }
 
@@ -113,13 +140,13 @@ class ArenaCommand(private val arenaManager: ArenaManager) {
         arenaManager.getArena(arena)?.let {
             // Checking if the player has permission
             if(!sender.hasPermission("disasters.forcestop")){
-                sender.sendMessage("§cYou do not have permission to do that.")
+                Msg.send(sender, "no-permission")
                 return
             }
             it.stop()
         } ?: run {
             // If the arena does not exist
-            sender.sendMessage("§cThat arena does not exist.")
+            Msg.send(sender, "arena-not-found")
         }
     }
 }

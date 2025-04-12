@@ -2,11 +2,13 @@ package me.hhitt.disasters.disaster.impl
 
 import me.hhitt.disasters.arena.Arena
 import me.hhitt.disasters.disaster.Disaster
+import me.hhitt.disasters.util.Notify
 import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.game.ClientGamePacketListener
 import net.minecraft.network.protocol.game.ClientboundInitializeBorderPacket
 import net.minecraft.world.level.border.WorldBorder
 import org.bukkit.Location
+import org.bukkit.craftbukkit.CraftWorld
 import org.bukkit.craftbukkit.entity.CraftPlayer
 import org.bukkit.entity.Player
 
@@ -14,9 +16,10 @@ import org.bukkit.entity.Player
 class WorldBorder : Disaster {
 
     private val arenaSizes = mutableMapOf<Arena, Double>()
-    private val shrinkAmountPerPulse = 2.0
+    private val shrinkAmountPerPulse = 0.5
 
     override fun start(arena: Arena) {
+        Notify.disaster(arena, "world-border")
         val corner1 = arena.corner1
         val corner2 = arena.corner2
         val center = Location(
@@ -33,7 +36,7 @@ class WorldBorder : Disaster {
         }
     }
 
-    override fun pulse() {
+    override fun pulse(time: Int) {
         val iterator = arenaSizes.iterator()
         while (iterator.hasNext()) {
             val (arena, currentRadius) = iterator.next()
@@ -52,6 +55,8 @@ class WorldBorder : Disaster {
                 for (player in arena.playing) {
                     sendWorldBorder(player, center, newRadius)
                 }
+                // Verificar y aplicar daño a los jugadores fuera de la frontera
+                checkPlayersOutsideBorderAndApplyDamage(arena, center, newRadius)
             }
         }
     }
@@ -64,7 +69,10 @@ class WorldBorder : Disaster {
     }
 
     private fun sendWorldBorder(player: Player, center: Location, size: Double) {
+        val craftWorld = player.world as CraftWorld
+        val worldServer = craftWorld.handle
         val worldBorder = WorldBorder()
+        worldBorder.world = worldServer
         worldBorder.setCenter(center.x, center.z)
         worldBorder.size = size
 
@@ -73,9 +81,12 @@ class WorldBorder : Disaster {
     }
 
     private fun resetWorldBorder(player: Player) {
+        val craftWorld = player.world as CraftWorld
+        val worldServer = craftWorld.handle
         val worldBorder = WorldBorder()
+        worldBorder.world = worldServer
         worldBorder.setCenter(player.world.spawnLocation.x, player.world.spawnLocation.z)
-        worldBorder.size = player.world.worldBorder.size
+        worldBorder.size = player.world.worldBorder.maxSize
 
         val packet = ClientboundInitializeBorderPacket(worldBorder)
         sendPacket(player, packet)
@@ -83,6 +94,19 @@ class WorldBorder : Disaster {
 
     private fun sendPacket(player: Player, packet: Packet<ClientGamePacketListener>) {
         (player as CraftPlayer).handle.connection.send(packet)
+    }
+
+    private fun checkPlayersOutsideBorderAndApplyDamage(arena: Arena, center: Location, radius: Double) {
+        for (player in arena.alive) {
+            val loc = player.location
+            if (loc.world == center.world) {
+                val distance = loc.distance(center)
+                if (distance > radius) {
+                    val damageAmount = 2.0
+                    player.damage(damageAmount)
+                }
+            }
+        }
     }
 }
 

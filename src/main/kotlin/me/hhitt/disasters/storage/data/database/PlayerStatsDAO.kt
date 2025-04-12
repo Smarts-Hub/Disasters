@@ -8,8 +8,16 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 import kotlinx.coroutines.Dispatchers
+import me.hhitt.disasters.Disasters
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import java.util.UUID
+
+/**
+ * Data Access Object (DAO) for managing player statistics in the database.
+ * This class is responsible for loading, updating, and retrieving player statistics.
+ *
+ * @param cache The cache instance used to store player statistics.
+ */
 
 class PlayerStatsDAO(private val cache: Cache) {
 
@@ -34,6 +42,7 @@ class PlayerStatsDAO(private val cache: Cache) {
                 )
             }
             "h2" -> {
+                Disasters.getInstance().logger.info("Loading H2 database...")
                 val databaseName = config.getString("database.name") ?: "database"
                 val url = "jdbc:h2:file:./data/$databaseName;DB_CLOSE_DELAY=-1;"
                 Database.connect(
@@ -47,6 +56,7 @@ class PlayerStatsDAO(private val cache: Cache) {
         }
 
         transaction {
+            Disasters.getInstance().logger.info("Enter at transaction!")
             SchemaUtils.create(Players)
         }
     }
