@@ -25,9 +25,7 @@ repositories {
     maven ("https://maven.enginehub.org/repo/")
 
     maven { url = uri("https://repo.codemc.io/repository/maven-releases/") }
-
     maven { url = uri("https://repo.codemc.io/repository/maven-snapshots/") }
-
     maven { url = uri("https://jitpack.io") }
 
 }
