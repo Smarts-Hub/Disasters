@@ -48,3 +48,18 @@ corner2:
   y: 0
   z: 0
   world: world
+
+
+# It will parse the placeholders to player, executed per one
+commands:
+  # Executed one time per winner
+  winners:
+    - "eco give %player_name% 50"
+    - "<other command>"
+  # Same for those who die
+  losers:
+    - "eco take %player_name% 10"
+    - "..."
+  # No matters if wins or not, will be perfom anyways
+  to-all:
+    - "say %player_name% example command!!!"

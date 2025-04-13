@@ -89,7 +89,12 @@ class ArenaManager(private val worldEdit: WorldEditPlugin?) {
                 arenaConfig.getDouble("corner2.z")
             )
 
-            val arena = Arena(arenaID, displayName, minPlayers, maxPlayers, aliveToEnd, gameTime, countdown, disasterRate, maxDisasters, location, corner1, corner2, worldEdit)
+            val winnersCommands = arenaConfig.getStringList("winners-commands")
+            val losersCommands = arenaConfig.getStringList("losers-commands")
+            val toAllCommands = arenaConfig.getStringList("to-all-commands")
+
+            val arena = Arena(arenaID, displayName, minPlayers, maxPlayers, aliveToEnd, gameTime, countdown, disasterRate,
+                maxDisasters, location, corner1, corner2, winnersCommands, losersCommands, toAllCommands, worldEdit)
 
             arenas.add(arena)
         }

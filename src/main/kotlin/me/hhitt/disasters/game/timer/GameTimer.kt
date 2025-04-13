@@ -1,6 +1,7 @@
 package me.hhitt.disasters.game.timer
 
 import com.github.shynixn.mccoroutine.bukkit.launch
+import me.clip.placeholderapi.PlaceholderAPI
 import me.hhitt.disasters.Disasters
 import me.hhitt.disasters.arena.Arena
 import me.hhitt.disasters.disaster.DisasterRegistry
@@ -10,6 +11,7 @@ import me.hhitt.disasters.game.GameState
 import me.hhitt.disasters.storage.data.Data
 import me.hhitt.disasters.util.Lobby
 import me.hhitt.disasters.util.Notify
+import org.bukkit.Bukkit
 import org.bukkit.scheduler.BukkitRunnable
 
 /**
@@ -54,6 +56,7 @@ class GameTimer(private val arena: Arena, private val session: GameSession) : Bu
     }
 
     override fun cancel() {
+        // Async
         plugin.launch {
             arena.playing.forEach { player ->
                 Data.increaseTotalPlayed(player.uniqueId)
@@ -66,6 +69,30 @@ class GameTimer(private val arena: Arena, private val session: GameSession) : Bu
             }
 
         }
+
+        // Main thread
+        arena.playing.forEach { player ->
+            // Loser commands
+            if (!arena.alive.contains(player)) {
+                for(command in arena.losersCommands) {
+                    val commandParsed = PlaceholderAPI.setPlaceholders(player, command)
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), commandParsed)
+                }
+            }
+            // Winner commands
+            if(arena.alive.contains(player)) {
+                for(command in arena.winnnersCommands) {
+                    val commandParsed = PlaceholderAPI.setPlaceholders(player, command)
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), commandParsed)
+                }
+            }
+            // To-all commands
+            for(command in arena.toAllCommands) {
+                val commandParsed = PlaceholderAPI.setPlaceholders(player, command)
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), commandParsed)
+            }
+        }
+
         Lobby.teleportAtEnd(arena)
         arena.state = GameState.RESTARTING
         super.cancel()
