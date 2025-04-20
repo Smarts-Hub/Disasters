@@ -48,7 +48,7 @@ class Arena(
     val location: Location,
     val corner1: Location,
     val corner2: Location,
-    val winnnersCommands: List<String>,
+    val winnersCommands: List<String>,
     val losersCommands: List<String>,
     val toAllCommands: List<String>,
     worldEdit: WorldEditPlugin?,

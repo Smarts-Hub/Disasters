@@ -1,7 +1,5 @@
 package me.hhitt.disasters.hook
 
-import com.github.shynixn.mccoroutine.bukkit.launch
-import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import me.clip.placeholderapi.expansion.PlaceholderExpansion
 import me.hhitt.disasters.Disasters
 import me.hhitt.disasters.arena.ArenaManager

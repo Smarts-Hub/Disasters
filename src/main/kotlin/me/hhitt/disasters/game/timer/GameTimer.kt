@@ -81,7 +81,7 @@ class GameTimer(private val arena: Arena, private val session: GameSession) : Bu
             }
             // Winner commands
             if(arena.alive.contains(player)) {
-                for(command in arena.winnnersCommands) {
+                for(command in arena.winnersCommands) {
                     val commandParsed = PlaceholderAPI.setPlaceholders(player, command)
                     Bukkit.dispatchCommand(Bukkit.getConsoleSender(), commandParsed)
                 }
