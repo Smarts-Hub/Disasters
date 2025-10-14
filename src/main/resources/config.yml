@@ -6,10 +6,6 @@
 # Useful links:
 # - https://discord.smartshub.dev -> support
 
-# Paste here your license key.
-# You should request one in the following link: https://discord.smartshub.dev/
-license: "license-key-here"
-
 # Available drivers: h2, mysql
 # If you are using h2, you don't need to specify the host, port, db-name,
 # username and password due to h2 is local database.
@@ -31,40 +27,6 @@ lobby:
   pitch: 0
 
 enable-scoreboard: true
-# How to use Disasters plugin.
-# The plugin is based on Arenas (games). Basically you need to create an arena
-# creating a new file in the "Arenas" folder. The plugin will handle the rest.
-# U only need to copy and paste the "example_arena.yml" file and change the values ( if you want ).
-# The arenas are restored after each game, so you don't need to worry about that.
-# The plugin will handle the restoration of the arena.
-
-# Commands:
-#   - /arena join <arena>
-#   - /arena quickjoin
-#   - /arena leave
-#   - /arena forcestart (in an arena, requieres disasters.forcestart permission)
-#   - /arena forcestart <arena> (requieres disasters.forcestart permission)
-#   - /arena forcestop (in an arena, requieres disasters.forcestart permission)
-#   - /arena forcestop <arena> (in an arena, requieres disasters.forcestart permission)
-
-#   - /disasters reload (reloads the plugin, requieres disasters.admin permission)
-#   - /disasters setspawn (set up the spawn location, requieres disasters.admin permission)
-
-# Placeholders:
-#    %disasters_wins%
-#    %disasters_defeats%
-#    %disasters_total_played%
-#    %disasters_arena%
-#    %disasters_is_in_arena%
-#    %disasters_arena_players%
-#    %disasters_game_max_players%
-#    %disasters_game_min_players%
-#    %disasters_game_state%
-#    %disasters_game_time%
-#    %disasters_game_time_left%
-#    %disasters_countdown_time%
-#    %disasters_countdown_time_left%
-
 
 # DO NOT TOUCH THIS!
 config-version: 1
