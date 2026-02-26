@@ -19,6 +19,8 @@ class GameSession(private val arena: Arena) {
     private val plugin = Disasters.getInstance()
     private var countdownTask: BukkitTask? = null
     private var timerTask: BukkitTask? = null
+    private var countdown: Countdown? = null
+    private var gameTimer: GameTimer? = null
 
     fun start() {
         if (arena.state == GameState.RECRUITING) {
@@ -28,15 +30,20 @@ class GameSession(private val arena: Arena) {
     }
 
     private fun startCountdown() {
-        countdownTask = Countdown(arena, this).runTaskTimer(plugin, 0, 20L)
+        val cd = Countdown(arena, this)
+        countdown = cd
+        countdownTask = cd.runTaskTimer(plugin, 0, 20L)
     }
 
     fun startGameTimer() {
         arena.state = GameState.LIVE
         countdownTask?.cancel()
         countdownTask = null
+        countdown = null
         arena.resetService.save()
-        timerTask = GameTimer(arena, this).runTaskTimer(plugin, 0, 20L)
+        val timer = GameTimer(arena, this)
+        gameTimer = timer
+        timerTask = timer.runTaskTimer(plugin, 0, 20L)
     }
 
     fun stop() {
@@ -44,40 +51,26 @@ class GameSession(private val arena: Arena) {
         timerTask?.cancel()
         countdownTask = null
         timerTask = null
+        countdown = null
+        gameTimer = null
         arena.state = GameState.RECRUITING
     }
 
-
     fun getTimeLeft(): Int {
-        return if (countdownTask != null) {
-            (countdownTask as Countdown).remaining
-        } else {
-            0
-        }
+        // During live game: return remaining time from GameTimer
+        // During countdown: return remaining time from Countdown
+        return gameTimer?.remaining ?: countdown?.remaining ?: 0
     }
 
     fun getGameTime(): Int {
-        return if (timerTask != null) {
-            (timerTask as GameTimer).time
-        } else {
-            0
-        }
+        return gameTimer?.time ?: 0
     }
 
     fun getCountdownTime(): Int {
-        return if (countdownTask != null) {
-            (countdownTask as Countdown).time
-        } else {
-            0
-        }
+        return countdown?.time ?: 0
     }
 
     fun getCountdownLeft(): Int {
-        return if (countdownTask != null) {
-            (countdownTask as Countdown).remaining
-        } else {
-            0
-        }
+        return countdown?.remaining ?: 0
     }
 }
-

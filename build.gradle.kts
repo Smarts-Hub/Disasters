@@ -30,7 +30,6 @@ dependencies {
 
     compileOnly("me.clip:placeholderapi:2.11.6")
     compileOnly("com.sk89q.worldedit:worldedit-bukkit:7.3.0")
-    runtimeOnly("com.github.radioegor146.native-obfuscator:annotations:3.5.4r")
 
     zap("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     zap("com.h2database:h2:2.2.220")

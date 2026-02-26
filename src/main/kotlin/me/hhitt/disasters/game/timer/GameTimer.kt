@@ -27,10 +27,10 @@ class GameTimer(private val arena: Arena, private val session: GameSession) : Bu
 
     private val plugin = Disasters.getInstance()
     var time = 0
-    private var remaining = arena.maxTime
+    val remaining: Int get() = arena.maxTime - time
 
     override fun run() {
-        if (time >= remaining) {
+        if (time >= arena.maxTime) {
             cancel()
             session.stop()
             return
@@ -59,7 +59,6 @@ class GameTimer(private val arena: Arena, private val session: GameSession) : Bu
         }
 
         time++
-        remaining--
     }
 
     override fun cancel() {
@@ -106,7 +105,6 @@ class GameTimer(private val arena: Arena, private val session: GameSession) : Bu
         Notify.gameEnd(arena)
         DisasterRegistry.removeDisasters(arena)
         time = 0
-        remaining = arena.maxTime
         arena.state = GameState.RECRUITING
         arena.resetService.paste()
     }
