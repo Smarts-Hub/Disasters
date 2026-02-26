@@ -6,6 +6,8 @@ import me.hhitt.disasters.model.block.DisappearBlock
 import me.hhitt.disasters.model.block.DisasterFloor
 import org.bukkit.Location
 import org.bukkit.entity.Player
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * DisasterRegistry is a singleton object that manages the active disasters in the game.
@@ -14,7 +16,9 @@ import org.bukkit.entity.Player
 
 object DisasterRegistry {
 
-    private val activeDisasters = mutableMapOf<Arena, MutableList<Disaster>>()
+    // Fixed: Using ConcurrentHashMap and CopyOnWriteArrayList to prevent ConcurrentModificationException
+    private val activeDisasters = ConcurrentHashMap<Arena, CopyOnWriteArrayList<Disaster>>()
+
     private val disasterClasses = listOf(
         AcidRain::class,
         Apocalypse::class,
@@ -42,9 +46,10 @@ object DisasterRegistry {
 
     fun addRandomDisaster(arena: Arena) {
         val maxDisasters = arena.maxDisasters
-        val currentDisasters = activeDisasters.getOrPut(arena) { mutableListOf() }
+        val currentDisasters = activeDisasters.getOrPut(arena) { CopyOnWriteArrayList() }
 
         if (currentDisasters.size >= maxDisasters) {
+            // CopyOnWriteArrayList handles removal safely even if pulseAll is running
             val toRemove = currentDisasters.removeAt(0)
             toRemove.stop(arena)
         }
@@ -62,6 +67,7 @@ object DisasterRegistry {
     }
 
     fun pulseAll(time: Int) {
+        // ConcurrentHashMap and CopyOnWriteArrayList provide thread-safe iterators.
         activeDisasters.forEach { (_, disasters) ->
             disasters.forEach { it.pulse(time) }
         }
@@ -76,13 +82,11 @@ object DisasterRegistry {
     fun addBlockToDisappear(arena: Arena, location: Location) {
         if(location.block.type.isAir) return
         val disaster = activeDisasters[arena]?.find { it is BlockDisappear } as? BlockDisappear
-        if (disaster == null) {
-        } else {
+        if (disaster != null) {
             val block = DisappearBlock(arena, location)
             disaster.addBlock(block)
         }
     }
-
 
     fun removeBlockFromDisappear(arena: Arena, block: DisappearBlock) {
         getDisaster<BlockDisappear>(arena)?.removeBlock(block)
@@ -105,7 +109,6 @@ object DisasterRegistry {
     fun isAllowedToFight(arena: Arena, player: Player): Boolean {
         return getDisaster<AllowFight>(arena)?.isAllowed(player) ?: false
     }
-
     fun isMurder(arena: Arena, player: Player): Boolean {
         return getDisaster<Murder>(arena)?.isMurder(player) ?: false
     }

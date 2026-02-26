@@ -5,11 +5,12 @@ import me.hhitt.disasters.disaster.Disaster
 import me.hhitt.disasters.util.Notify
 import org.bukkit.entity.Player
 import org.bukkit.potion.PotionEffect
+import java.util.concurrent.CopyOnWriteArrayList
 
 class ZeroGravity : Disaster {
 
-    private val players = mutableListOf<Player>()
-    private val count = 0
+    private val players = CopyOnWriteArrayList<Player>()
+    private var count = 0
 
     override fun start(arena: Arena) {
         arena.playing.forEach() {
@@ -31,7 +32,8 @@ class ZeroGravity : Disaster {
     }
 
     override fun pulse(time: Int) {
-        if(count > 30) return
+        // Runs about 60s total
+        if(count > 110) return
 
         if (time % 11 != 0) return
 
@@ -47,14 +49,11 @@ class ZeroGravity : Disaster {
             )
         }
 
-        count.inc()
+        count++
     }
 
 
     override fun stop(arena: Arena) {
-        arena.playing.forEach {
-            players.remove(it)
-            it.removePotionEffect(org.bukkit.potion.PotionEffectType.LEVITATION)
-        }
+        arena.playing.forEach { players.remove(it) }
     }
 }

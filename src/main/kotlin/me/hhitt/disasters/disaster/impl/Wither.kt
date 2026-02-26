@@ -5,9 +5,10 @@ import me.hhitt.disasters.disaster.Disaster
 import me.hhitt.disasters.util.Notify
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Wither
+import java.util.concurrent.ConcurrentHashMap
 
 class Wither : Disaster {
-    private val activeWithers = mutableMapOf<Arena, Wither>()
+    private val activeWithers = ConcurrentHashMap<Arena, Wither>()
 
     override fun start(arena: Arena) {
         val wither = arena.location.world.spawnEntity(arena.location, EntityType.WITHER) as Wither

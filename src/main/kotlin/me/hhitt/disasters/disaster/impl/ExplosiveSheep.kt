@@ -9,15 +9,15 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.craftbukkit.CraftWorld
 import org.bukkit.entity.Player
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.random.Random
 
 class ExplosiveSheep: Disaster {
 
-    val arenas = mutableListOf<Arena>()
-    val sheeps = mutableListOf<DisasterSheep>()
+    val arenaSheep = mutableMapOf<Arena, CopyOnWriteArrayList<DisasterSheep>>()
 
     override fun start(arena: Arena) {
-        arenas.add(arena)
+        arenaSheep[arena] = CopyOnWriteArrayList()
         Notify.disaster(arena, "explosive-sheep")
     }
 
@@ -25,38 +25,38 @@ class ExplosiveSheep: Disaster {
         tick()
 
         if(time % 5 != 0) return
-        arenas.forEach { arena ->
+        arenaSheep.keys.toList().forEach { arena ->
             arena.alive.forEach { player ->
-                spawnSheep(player, 10, 1)
+                spawnSheep(arena, player, 10, 1)
             }
         }
     }
 
     override fun stop(arena: Arena) {
-        sheeps.forEach { it.remove(Entity.RemovalReason.KILLED) }
-        arenas.remove(arena)
+        arenaSheep.remove(arena)?.forEach { it.remove(Entity.RemovalReason.KILLED) }
     }
 
     private fun tick() {
-        val iterator = sheeps.iterator()
-        while (iterator.hasNext()) {
-            val sheep = iterator.next()
-            if (sheep.isAlive) {
-                sheep.call()
-            } else {
-                iterator.remove()
+        arenaSheep.values.forEach { sheeps ->
+            sheeps.removeIf { sheep ->
+                if (sheep.isAlive) {
+                    sheep.call()
+                    false
+                } else {
+                    true
+                }
             }
         }
     }
 
-
-    private fun spawnSheep(player: Player, radius: Int, amount: Int) {
+    private fun spawnSheep(arena: Arena, player: Player, radius: Int, amount: Int) {
         repeat(amount) {
             val spawnLocation = findSafeSpawnLocation(player.location, radius)
             spawnLocation?.let {
-                val sheep = DisasterSheep(net.minecraft.world.entity.EntityType.SHEEP , (spawnLocation.world as CraftWorld).handle.level, spawnLocation)
-                (spawnLocation.world as CraftWorld).handle.addFreshEntity(sheep)
-                sheeps.add(sheep)
+                val handle = (spawnLocation.world as CraftWorld).handle
+                val sheep = DisasterSheep(net.minecraft.world.entity.EntityType.SHEEP, handle.level, spawnLocation)
+                handle.addFreshEntity(sheep)
+                arenaSheep[arena]?.add(sheep)
             }
         }
     }
@@ -78,7 +78,7 @@ class ExplosiveSheep: Disaster {
     private fun isSafeLocation(location: Location): Boolean {
         val world = location.world
         val block = world.getBlockAt(location)
-        val blockAbove = world.getBlockAt(location.add(0.0, 1.0, 0.0))
+        val blockAbove = world.getBlockAt(location.clone().add(0.0, 1.0, 0.0))
 
         return block.type != Material.LAVA &&
                 block.type != Material.CACTUS &&

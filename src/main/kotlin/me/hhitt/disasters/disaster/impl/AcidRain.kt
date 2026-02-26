@@ -7,10 +7,11 @@ import org.bukkit.Material
 import org.bukkit.WeatherType
 import org.bukkit.block.Block
 import org.bukkit.craftbukkit.entity.CraftPlayer
+import java.util.concurrent.CopyOnWriteArrayList
 
 class AcidRain: Disaster {
 
-    private val arenas = mutableListOf<Arena>()
+    private val arenas = CopyOnWriteArrayList<Arena>()
 
     override fun start(arena: Arena) {
         arena.playing.forEach {
@@ -23,11 +24,12 @@ class AcidRain: Disaster {
     }
 
     override fun pulse(time: Int) {
-        arenas.forEach {
-            it.alive.forEach {
-                val player: CraftPlayer = it as CraftPlayer
-                if(!isCoveredAndBreak(player.location.block)) {
-                    player.damage(2.0)
+        arenas.forEach { arena ->
+            arena.alive.toList().forEach { player ->
+                val craft = player as CraftPlayer
+
+                if (!isCoveredAndBreakFast(craft.location.block)) {
+                    craft.damage(2.0)
                 }
             }
         }
@@ -41,21 +43,18 @@ class AcidRain: Disaster {
         arenas.remove(arena)
     }
 
-    private fun isCoveredAndBreak(block: Block): Boolean {
+    private fun isCoveredAndBreakFast(block: Block): Boolean {
         val world = block.world
-        val playerY = block.y
-        var topBlock: Block? = null
 
-        for (y in playerY + 1 until world.maxHeight) {
-            val aboveBlock = world.getBlockAt(block.x, y, block.z)
-            if (aboveBlock.type != Material.AIR) {
-                topBlock = aboveBlock
+        val highestY = world.getHighestBlockYAt(block.x, block.z)
+
+        if (highestY > block.y) {
+            val topBlock = world.getBlockAt(block.x, highestY, block.z)
+
+            if (topBlock.type != Material.AIR) {
+                topBlock.breakNaturally()
+                return true
             }
-        }
-
-        topBlock?.let {
-            it.breakNaturally()
-            return true
         }
 
         return false
