@@ -27,10 +27,10 @@ class GameTimer(private val arena: Arena, private val session: GameSession) : Bu
 
     private val plugin = Disasters.getInstance()
     var time = 0
-    private var remaining = arena.maxTime
+    val remaining: Int get() = arena.maxTime - time
 
     override fun run() {
-        if (time >= remaining) {
+        if (time >= arena.maxTime) {
             cancel()
             session.stop()
             return
@@ -46,20 +46,20 @@ class GameTimer(private val arena: Arena, private val session: GameSession) : Bu
             DisasterRegistry.addRandomDisaster(arena)
         }
 
-        if(arena.disasters.contains(FloorIsLava())){
+        // Fix: Use type check (any { it is T }) instead of contains(T()) which fails on reference equality
+        if (arena.disasters.any { it is FloorIsLava }) {
             arena.alive.forEach { player ->
                 DisasterRegistry.addBlockToFloorIsLava(arena, player.location)
             }
         }
 
-        if(arena.disasters.contains(BlockDisappear())){
+        if (arena.disasters.any { it is BlockDisappear }) {
             arena.alive.forEach { player ->
                 DisasterRegistry.addBlockToDisappear(arena, player.location)
             }
         }
 
         time++
-        remaining--
     }
 
     override fun cancel() {
@@ -106,7 +106,6 @@ class GameTimer(private val arena: Arena, private val session: GameSession) : Bu
         Notify.gameEnd(arena)
         DisasterRegistry.removeDisasters(arena)
         time = 0
-        remaining = arena.maxTime
         arena.state = GameState.RECRUITING
         arena.resetService.paste()
     }

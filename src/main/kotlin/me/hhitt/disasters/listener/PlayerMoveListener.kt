@@ -40,6 +40,10 @@ class PlayerMoveListener(private val arenaManager: ArenaManager): Listener {
 
         if (arena.disasters.any { it is BlockDisappear }) {
             if(arena.borderService.isLocationInArenaTp(event.player)) {
+                // Pause cracking on the block the player just left
+                val blockBelowFrom = event.from.clone().subtract(0.0, 1.0, 0.0)
+                DisasterRegistry.setBlockUnoccupied(arena, blockBelowFrom)
+
                 DisasterRegistry.addBlockToDisappear(arena, event.to)
             }
         }
