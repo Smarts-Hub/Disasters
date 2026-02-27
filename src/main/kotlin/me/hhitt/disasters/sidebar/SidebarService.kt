@@ -27,7 +27,7 @@ class SidebarService(private val arenaManager: ArenaManager) {
         if (isScoreboardEnabled) {
             if (sidebarTask == null || sidebarTask!!.isCancelled) {
                 sidebarTask = SidebarTask(arenaManager, sidebarManager)
-                sidebarTask!!.runTaskTimer(plugin, 0, 20L)
+                sidebarTask!!.runTaskTimerAsynchronously(plugin, 0, 20L)
             }
         } else {
             sidebarTask?.cancel()
