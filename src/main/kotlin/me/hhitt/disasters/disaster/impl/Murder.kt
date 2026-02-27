@@ -8,11 +8,12 @@ import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 class Murder : Disaster {
 
-    private val players = mutableMapOf<UUID, Player>()
-    private val murderers = mutableSetOf<UUID>()
+    private val players = ConcurrentHashMap<UUID, Player>()
+    private val murderers = ConcurrentHashMap.newKeySet<UUID>()
 
     override fun start(arena: Arena) {
         arena.playing.forEach { player ->
@@ -26,9 +27,9 @@ class Murder : Disaster {
     }
 
     override fun stop(arena: Arena) {
-        players.forEach {
-            if(murderers.contains(it.key)){
-                it.value.inventory.setItem(5, ItemStack.of(Material.AIR))
+        players.forEach { (uuid, player) ->
+            if (murderers.contains(uuid)) {
+                player.inventory.setItem(5, ItemStack(Material.AIR))
             }
         }
         players.clear()

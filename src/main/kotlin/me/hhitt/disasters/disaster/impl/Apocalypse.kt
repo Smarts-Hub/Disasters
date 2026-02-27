@@ -9,11 +9,12 @@ import org.bukkit.Material
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
 import org.bukkit.World
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.random.Random
 
 class Apocalypse: Disaster {
 
-    private val arenas = mutableListOf<Arena>()
+    private val arenas = CopyOnWriteArrayList<Arena>()
 
     override fun start(arena: Arena) {
         arenas.add(arena)

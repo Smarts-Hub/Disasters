@@ -43,10 +43,13 @@ class ResetArenaService(
 
 
     fun save() {
+        val world = arena.corner1.world ?: return println("[Disasters] ERROR: World is null before save!")
         val min: BlockVector3 = BlockVector3.at(arena.corner1.x, arena.corner1.y, arena.corner1.z)
         val max: BlockVector3 = BlockVector3.at(arena.corner2.x, arena.corner2.y, arena.corner2.z)
         val region = CuboidRegion(min, max)
         val clipboard = BlockArrayClipboard(region)
+        val blockCount = region.volume
+        println("[Disasters] Saving arena '${arena.name}' blocks: $blockCount")
         worldEdit!!.worldEdit.newEditSession(BukkitAdapter.adapt(world)).use { editSession ->
             val forwardExtentCopy = ForwardExtentCopy(editSession, region, clipboard, region.minimumPoint)
             try {
@@ -60,10 +63,15 @@ class ResetArenaService(
     }
 
     fun paste() {
-
+        if (!::clipboard.isInitialized) {
+            println("[Disasters] ERROR: Clipboard not initialized!")
+            return
+        }
+        println("[Disasters] Paste triggered for '${arena.name}'")
         removeEntitiesInRegion()
 
         worldEdit!!.worldEdit.newEditSession(BukkitAdapter.adapt(world)).use { editSession ->
+            println("[Disasters] Pasting arena '${arena.name}' now...")
             val operation = ClipboardHolder(clipboard)
                 .createPaste(editSession)
                 .to(center)
@@ -77,6 +85,7 @@ class ResetArenaService(
         }
         refreshChunks(world, arena.corner1, arena.corner2)
         arena.state = GameState.RECRUITING
+        println("[Disasters] Paste complete for '${arena.name}'")
     }
 
     private fun refreshChunks(world: World, loc1: Location, loc2: Location) {

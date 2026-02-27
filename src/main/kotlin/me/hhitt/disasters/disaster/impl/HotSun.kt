@@ -4,10 +4,11 @@ import me.hhitt.disasters.arena.Arena
 import me.hhitt.disasters.disaster.Disaster
 import me.hhitt.disasters.util.Notify
 import org.bukkit.entity.Player
+import java.util.concurrent.CopyOnWriteArrayList
 
 class HotSun : Disaster {
 
-    private val players = mutableListOf<Player>()
+    private val players = CopyOnWriteArrayList<Player>()
 
     override fun start(arena: Arena) {
         arena.playing.forEach { players.add(it) }

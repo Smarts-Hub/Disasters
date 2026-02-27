@@ -32,8 +32,10 @@ class BorderService(
     private val maxY = max(y1, y2).toInt()
 
     fun isLocationInArena(loc: Location): Boolean {
+        val world = loc.world ?: return false
+        val arenaWorld = corner1.world ?: return false
 
-        if (!loc.world.name.equals(corner1.world.name, ignoreCase = true)) {
+        if (!world.name.equals(arenaWorld.name, ignoreCase = true)) {
             return false
         }
 
@@ -42,8 +44,10 @@ class BorderService(
 
     fun isLocationInArenaTp(player: Player): Boolean {
         val currentLoc = player.location
+        val world = currentLoc.world ?: return false
+        val arenaWorld = corner1.world ?: return false
 
-        if (!currentLoc.world.name.equals(corner1.world.name, ignoreCase = true)) {
+        if (!world.name.equals(arenaWorld.name, ignoreCase = true)) {
             return false
         }
 
