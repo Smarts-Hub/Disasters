@@ -28,8 +28,9 @@ class SidebarManager {
 
         val isNewPlayer = !states.containsKey(playerId)
         val stateChanged = states[playerId] != state
+        val isDynamic = state == GameState.COUNTDOWN || state == GameState.LIVE
 
-        if (isNewPlayer || stateChanged) {
+        if (isNewPlayer || stateChanged || isDynamic) {
             updateBoardContent(board, state, player)
             states[playerId] = state
         }
