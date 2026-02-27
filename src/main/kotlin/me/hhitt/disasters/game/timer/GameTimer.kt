@@ -46,13 +46,14 @@ class GameTimer(private val arena: Arena, private val session: GameSession) : Bu
             DisasterRegistry.addRandomDisaster(arena)
         }
 
-        if(arena.disasters.contains(FloorIsLava())){
+        // Fix: Use type check (any { it is T }) instead of contains(T()) which fails on reference equality
+        if (arena.disasters.any { it is FloorIsLava }) {
             arena.alive.forEach { player ->
                 DisasterRegistry.addBlockToFloorIsLava(arena, player.location)
             }
         }
 
-        if(arena.disasters.contains(BlockDisappear())){
+        if (arena.disasters.any { it is BlockDisappear }) {
             arena.alive.forEach { player ->
                 DisasterRegistry.addBlockToDisappear(arena, player.location)
             }

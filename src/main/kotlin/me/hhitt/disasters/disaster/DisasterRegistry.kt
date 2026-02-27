@@ -5,6 +5,8 @@ import me.hhitt.disasters.disaster.impl.*
 import me.hhitt.disasters.model.block.DisappearBlock
 import me.hhitt.disasters.model.block.DisasterFloor
 import org.bukkit.Location
+import org.bukkit.Material
+import org.bukkit.Tag
 import org.bukkit.entity.Player
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
@@ -79,12 +81,25 @@ object DisasterRegistry {
         arena.disasters.clear()
     }
 
+    /**
+     * Returns true if the player is on a climbable block (ladder, vines, etc.)
+     * Both disasters should be skipped when the player is climbing.
+     */
+    private fun isPlayerOnClimbable(location: Location): Boolean {
+        return Tag.CLIMBABLE.isTagged(location.block.type)
+    }
+
     fun addBlockToDisappear(arena: Arena, location: Location) {
-        if(location.block.type.isAir) return
+        // Skip if player is on a ladder/vine — don't break blocks while climbing
+        if (isPlayerOnClimbable(location)) return
+
+        // Fix: Check the block below the player's feet, not the block at foot level (which is air on full blocks)
+        val blockBelow = location.clone().subtract(0.0, 1.0, 0.0)
+        if (blockBelow.block.type.isAir) return
+
         val disaster = activeDisasters[arena]?.find { it is BlockDisappear } as? BlockDisappear
         if (disaster != null) {
-            val block = DisappearBlock(arena, location)
-            disaster.addBlock(block)
+            disaster.addBlock(arena, blockBelow)
         }
     }
 
@@ -92,9 +107,24 @@ object DisasterRegistry {
         getDisaster<BlockDisappear>(arena)?.removeBlock(block)
     }
 
+    // Pauses cracking on a block when the player steps off it
+    fun setBlockUnoccupied(arena: Arena, location: Location) {
+        getDisaster<BlockDisappear>(arena)?.setUnoccupied(location)
+    }
+
     fun addBlockToFloorIsLava(arena: Arena, location: Location) {
-        if(location.block.type.isAir) return
-        val block = DisasterFloor(arena, location)
+        // Skip if player is on a ladder/vine — don't turn blocks to lava while climbing
+        if (isPlayerOnClimbable(location)) return
+
+        // Fix: Check the block below the player's feet, not the block at foot level (which is air on full blocks)
+        val blockBelow = location.clone().subtract(0.0, 1.0, 0.0)
+        if (blockBelow.block.type.isAir) return
+
+        // Don't turn water or lava into wool - lava
+        val blockType = blockBelow.block.type
+        if (blockType == Material.WATER || blockType == Material.LAVA) return
+
+        val block = DisasterFloor(arena, blockBelow)
         getDisaster<FloorIsLava>(arena)?.addBlock(block)
     }
 
