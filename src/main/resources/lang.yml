@@ -188,6 +188,13 @@ disaster:
       - "<gold>----------------------------------"
       - "<red>Now blocks under u will disappear!"
       - "<gold>----------------------------------"
+  meteor-shower:
+    title: "<red>Meteor Shower!"
+    subtitle: "<red>Meteors are falling from the sky!"
+    chat:
+      - "<gold>----------------------------------"
+      - "<red>Meteors are raining down, find cover!"
+      - "<gold>----------------------------------"
 
 # DO NOT TOUCH THIS!
 config-version: 1
