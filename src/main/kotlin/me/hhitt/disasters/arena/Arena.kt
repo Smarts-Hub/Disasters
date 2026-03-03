@@ -7,6 +7,7 @@ import me.hhitt.disasters.arena.service.RespawnService
 import me.hhitt.disasters.disaster.Disaster
 import me.hhitt.disasters.disaster.impl.WorldBorder
 import me.hhitt.disasters.game.GameSession
+import me.hhitt.disasters.game.GameMode
 import me.hhitt.disasters.game.GameState
 import me.hhitt.disasters.util.Lobby
 import me.hhitt.disasters.util.Notify
@@ -57,6 +58,8 @@ class Arena(
     val playing: MutableList<Player> = mutableListOf()
     val alive: MutableList<Player> = mutableListOf()
     val disasters: MutableList<Disaster> = mutableListOf()
+    var gameMode = GameMode.PVP
+    var disasterMultiplier = 1
     var state = GameState.RECRUITING
     val borderService = BorderService(corner1, corner2)
     val resetService = ResetArenaService(this, worldEdit)

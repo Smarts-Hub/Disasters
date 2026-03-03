@@ -2,6 +2,7 @@ package me.hhitt.disasters.disaster
 
 import me.hhitt.disasters.arena.Arena
 import me.hhitt.disasters.disaster.impl.*
+import me.hhitt.disasters.game.GameMode
 import me.hhitt.disasters.model.block.DisappearBlock
 import me.hhitt.disasters.model.block.DisasterFloor
 import org.bukkit.Location
@@ -42,12 +43,19 @@ object DisasterRegistry {
         WorldBorder::class
     )
 
+    // Disasters that require PvP - everything else is PvE-safe by default
+    private val pvpDisasters = setOf(
+        AllowFight::class,
+        Murder::class,
+        Swap::class
+    )
+
     private inline fun <reified T : Disaster> getDisaster(arena: Arena): T? {
         return activeDisasters[arena]?.find { it is T } as? T
     }
 
     fun addRandomDisaster(arena: Arena) {
-        val maxDisasters = arena.maxDisasters
+        val maxDisasters = arena.maxDisasters * arena.disasterMultiplier
         val currentDisasters = activeDisasters.getOrPut(arena) { CopyOnWriteArrayList() }
 
         if (currentDisasters.size >= maxDisasters) {
@@ -56,8 +64,13 @@ object DisasterRegistry {
             toRemove.stop(arena)
         }
 
-        val available = disasterClasses.filter { cls ->
+        var available = disasterClasses.filter { cls ->
             currentDisasters.none { it::class == cls }
+        }
+
+        // Filter out PvP disasters if arena is in PvE mode
+        if (arena.gameMode == GameMode.PVE) {
+            available = available.filter { it !in pvpDisasters }
         }
 
         if (available.isNotEmpty()) {

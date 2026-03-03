@@ -27,6 +27,12 @@ lobby:
   pitch: 0
 
 enable-scoreboard: true
+# Voting system settings
+voting:
+# Enable/disable the PvP vs PvE vote during countdown
+  enabled: true
+  # Enable/disable the disaster multiplier vote (1x-5x)
+  multiplier-enabled: true
 
 # DO NOT TOUCH THIS!
 config-version: 1

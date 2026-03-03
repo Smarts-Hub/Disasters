@@ -1,7 +1,9 @@
 package me.hhitt.disasters.game.countdown
 
+import me.hhitt.disasters.Disasters
 import me.hhitt.disasters.arena.Arena
 import me.hhitt.disasters.game.GameSession
+import me.hhitt.disasters.game.vote.VoteManager
 import me.hhitt.disasters.util.Notify
 import org.bukkit.scheduler.BukkitRunnable
 
@@ -17,11 +19,18 @@ class Countdown(private val arena: Arena, private val session: GameSession) : Bu
 
     var time = 0
     var remaining = arena.countdown
+    private var voteManager: VoteManager? = null
 
     override fun run() {
         if (time >= arena.countdown) {
             if(time >= (arena.countdown + 2)) {
                 Notify.gameStart(arena)
+
+                // Resolve vote BEFORE cancel() which clears voteManager
+                voteManager?.let { manager ->
+                    arena.gameMode = manager.resolveVote()
+                }
+
                 cancel()
                 session.startGameTimer()
             }
@@ -34,6 +43,15 @@ class Countdown(private val arena: Arena, private val session: GameSession) : Bu
             return
         }
 
+        // Open vote GUI when 5 seconds remain in countdown
+        if (time == 0 && voteManager == null) {
+            val config = Disasters.getInstance().config
+            if (config.getBoolean("voting.enabled", true)) {
+                voteManager = VoteManager(arena)
+                voteManager?.startVote()
+            }
+        }
+
         Notify.countdown(arena, remaining)
         time++
         remaining--
@@ -41,6 +59,7 @@ class Countdown(private val arena: Arena, private val session: GameSession) : Bu
 
     override fun cancel() {
         super.cancel()
+        voteManager = null
         Notify.countdownCanceled(arena)
         time = 0
         remaining = arena.countdown
