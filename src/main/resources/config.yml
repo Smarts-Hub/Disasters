@@ -33,6 +33,8 @@ voting:
   enabled: true
   # Enable/disable the disaster multiplier vote (1x-5x)
   multiplier-enabled: true
+  
+show-active-disasters: false
 
 # DO NOT TOUCH THIS!
 config-version: 1
