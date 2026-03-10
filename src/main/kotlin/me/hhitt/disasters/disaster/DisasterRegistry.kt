@@ -22,6 +22,7 @@ object DisasterRegistry {
     private val activeDisasters = ConcurrentHashMap<Arena, CopyOnWriteArrayList<Disaster>>()
 
     private val disasterClasses = listOf(
+        MeteorShower::class,
         AcidRain::class,
         Apocalypse::class,
         Blind::class,
