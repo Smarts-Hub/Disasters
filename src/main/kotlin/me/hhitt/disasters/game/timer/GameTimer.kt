@@ -42,7 +42,9 @@ class GameTimer(private val arena: Arena, private val session: GameSession) : Bu
             return
         }
 
-        if (time % arena.rate == 0) {
+        // Scale spawn rate by disaster multiplier (e.g. 2x = spawn twice as fast)
+        val effectiveRate = (arena.rate / arena.disasterMultiplier).coerceAtLeast(1)
+        if (time % effectiveRate == 0) {
             DisasterRegistry.addRandomDisaster(arena)
         }
 
