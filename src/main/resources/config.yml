@@ -27,6 +27,7 @@ lobby:
   pitch: 0
 
 enable-scoreboard: true
+show-active-disasters: false
 
 # DO NOT TOUCH THIS!
 config-version: 1

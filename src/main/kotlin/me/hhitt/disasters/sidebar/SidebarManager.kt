@@ -1,6 +1,7 @@
 package me.hhitt.disasters.sidebar
 
 import fr.mrmicky.fastboard.adventure.FastBoard
+import me.hhitt.disasters.arena.Arena
 import me.hhitt.disasters.game.GameState
 import me.hhitt.disasters.storage.file.FileManager
 import me.hhitt.disasters.util.Msg
@@ -16,10 +17,11 @@ import java.util.UUID
 class SidebarManager {
 
     private val config = FileManager.get("scoreboard")!!
+    private val mainConfig = FileManager.get("config")!!
     private val boards = mutableMapOf<UUID, FastBoard>()
     private val states = mutableMapOf<UUID, GameState?>()
 
-    fun updateSidebar(player: Player, state: GameState?) {
+    fun updateSidebar(player: Player, state: GameState?, arena: Arena? = null) {
         val playerId = player.uniqueId
 
         val board = boards.computeIfAbsent(playerId) {
@@ -31,12 +33,12 @@ class SidebarManager {
         val isDynamic = state == GameState.COUNTDOWN || state == GameState.LIVE
 
         if (isNewPlayer || stateChanged || isDynamic) {
-            updateBoardContent(board, state, player)
+            updateBoardContent(board, state, player, arena)
             states[playerId] = state
         }
     }
 
-    private fun updateBoardContent(board: FastBoard, state: GameState?, player: Player) {
+    private fun updateBoardContent(board: FastBoard, state: GameState?, player: Player, arena: Arena? = null) {
         when (state) {
             GameState.RECRUITING -> {
                 board.updateTitle(Msg.parse(config.getString("recruiting.title")!!, player))
@@ -51,7 +53,22 @@ class SidebarManager {
             GameState.LIVE -> {
                 board.updateTitle(Msg.parse(config.getString("live.title")!!, player))
                 val lines = config.getStringList("live.lines")
-                board.updateLines(parseLines(lines, player))
+                val parsed = parseLines(lines, player).toMutableList()
+
+                // Append active disaster names if enabled in config
+                if (arena != null && mainConfig.getBoolean("show-active-disasters", false)) {
+                    val disasters = arena.disasters
+                    if (disasters.isNotEmpty()) {
+                        parsed.add(Component.empty())
+                        parsed.add(Msg.parse("<gray>Disasters:", player))
+                        disasters.forEach { disaster ->
+                            val name = formatDisasterName(disaster::class.simpleName ?: "Unknown")
+                            parsed.add(Msg.parse("<green>  $name", player))
+                        }
+                    }
+                }
+
+                board.updateLines(parsed)
             }
             GameState.RESTARTING -> {
                 board.updateTitle(Msg.parse(config.getString("restarting.title")!!, player))
@@ -64,6 +81,14 @@ class SidebarManager {
                 board.updateLines(parseLines(lines, player))
             }
         }
+    }
+
+    /**
+     * Converts a class name like "MeteorShower" or "FloorIsLava" into a readable
+     * display name like "Meteor Shower" or "Floor Is Lava".
+     */
+    private fun formatDisasterName(className: String): String {
+        return className.replace(Regex("([a-z])([A-Z])"), "$1 $2")
     }
 
     private fun parseLines(lines: List<String>, player: Player): List<Component> {
