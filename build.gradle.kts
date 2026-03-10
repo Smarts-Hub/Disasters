@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "me.hhitt"
-version = "1.4.0-SNAPSHOT"
+version = "1.4.1-SNAPSHOT"
 
 repositories {
     mavenCentral()
