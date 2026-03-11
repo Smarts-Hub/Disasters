@@ -36,5 +36,8 @@ voting:
   
 show-active-disasters: false
 
+# Damage dealt by the Hot Sun disaster every second (0.5 = 1/4 heart)
+hot-sun-damage: 0.5
+
 # DO NOT TOUCH THIS!
 config-version: 1
