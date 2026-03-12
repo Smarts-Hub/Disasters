@@ -103,17 +103,36 @@ object DisasterRegistry {
         return Tag.CLIMBABLE.isTagged(location.block.type)
     }
 
+    /**
+     * Finds the solid block under the player's feet.
+     * If player Y has a decimal (on a slab/stair), checks foot level first.
+     * Otherwise subtracts 1.0 like normal for full blocks.
+     */
+    private fun getBlockUnderPlayer(location: Location): Location? {
+        // If Y has a decimal, player may be on a half block — check foot level first
+        if (location.y % 1.0 != 0.0) {
+            val atFeet = location.clone()
+            if (!atFeet.block.type.isAir && atFeet.block.type.isSolid) {
+                return atFeet
+            }
+        }
+        // Full block — check one block below
+        val blockBelow = location.clone().subtract(0.0, 1.0, 0.0)
+        if (!blockBelow.block.type.isAir) {
+            return blockBelow
+        }
+        return null
+    }
+
     fun addBlockToDisappear(arena: Arena, location: Location) {
         // Skip if player is on a ladder/vine — don't break blocks while climbing
         if (isPlayerOnClimbable(location)) return
 
-        // Fix: Check the block below the player's feet, not the block at foot level (which is air on full blocks)
-        val blockBelow = location.clone().subtract(0.0, 1.0, 0.0)
-        if (blockBelow.block.type.isAir) return
+        val block = getBlockUnderPlayer(location) ?: return
 
         val disaster = activeDisasters[arena]?.find { it is BlockDisappear } as? BlockDisappear
         if (disaster != null) {
-            disaster.addBlock(arena, blockBelow)
+            disaster.addBlock(arena, block)
         }
     }
 
@@ -130,16 +149,14 @@ object DisasterRegistry {
         // Skip if player is on a ladder/vine — don't turn blocks to lava while climbing
         if (isPlayerOnClimbable(location)) return
 
-        // Fix: Check the block below the player's feet, not the block at foot level (which is air on full blocks)
-        val blockBelow = location.clone().subtract(0.0, 1.0, 0.0)
-        if (blockBelow.block.type.isAir) return
+        val block = getBlockUnderPlayer(location) ?: return
 
         // Don't turn water or lava into wool - lava
-        val blockType = blockBelow.block.type
+        val blockType = block.block.type
         if (blockType == Material.WATER || blockType == Material.LAVA) return
 
-        val block = DisasterFloor(arena, blockBelow)
-        getDisaster<FloorIsLava>(arena)?.addBlock(block)
+        val floorBlock = DisasterFloor(arena, block)
+        getDisaster<FloorIsLava>(arena)?.addBlock(floorBlock)
     }
 
     fun removeBlockFromFloorIsLava(arena: Arena, block: DisasterFloor) {

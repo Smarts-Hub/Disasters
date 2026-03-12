@@ -2,6 +2,7 @@ package me.hhitt.disasters.disaster.impl
 
 import me.hhitt.disasters.arena.Arena
 import me.hhitt.disasters.disaster.Disaster
+import me.hhitt.disasters.disaster.DisasterRegistry
 import me.hhitt.disasters.model.block.DisappearBlock
 import me.hhitt.disasters.util.Notify
 import java.util.concurrent.ConcurrentHashMap
@@ -10,6 +11,7 @@ class BlockDisappear : Disaster {
 
     // Keyed by block location string so we can look up existing blocks for pause/resume
     private val blocks = ConcurrentHashMap<String, DisappearBlock>()
+    private var arena: Arena? = null
 
     // Duration in seconds — disaster stops accepting new blocks after this
     private val duration = 120
@@ -17,6 +19,7 @@ class BlockDisappear : Disaster {
     private var active = true
 
     override fun start(arena: Arena) {
+        this.arena = arena
         Notify.disaster(arena, "disappear-blocks")
     }
 
@@ -27,10 +30,32 @@ class BlockDisappear : Disaster {
             active = false
         }
         blocks.values.forEach { it.updateMaterial() }
+
+        // If a player is standing on air, find the closest solid block under them and add it
+        val currentArena = arena ?: return
+        if (!active) return
+        currentArena.alive.toList().forEach { player ->
+            val loc = player.location
+            val blockBelow = loc.clone().subtract(0.0, 1.0, 0.0)
+            if (blockBelow.block.type.isAir) {
+                // Player center is over air — check hitbox corners for a solid block nearby
+                val offsets = doubleArrayOf(-0.3, 0.3)
+                for (dx in offsets) {
+                    for (dz in offsets) {
+                        val check = loc.clone().add(dx, -1.0, dz)
+                        if (!check.block.type.isAir && check.block.type.isSolid) {
+                            DisasterRegistry.addBlockToDisappear(currentArena, loc.clone().add(dx, 0.0, dz))
+                            return@forEach
+                        }
+                    }
+                }
+            }
+        }
     }
 
     override fun stop(arena: Arena) {
         blocks.clear()
+        this.arena = null
     }
 
     fun isActive(): Boolean = active
