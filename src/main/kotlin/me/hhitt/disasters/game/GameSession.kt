@@ -30,6 +30,8 @@ class GameSession(private val arena: Arena) {
     }
 
     private fun startCountdown() {
+        // Start saving arena async immediately so it finishes before game starts
+        arena.resetService.save()
         val cd = Countdown(arena, this)
         countdown = cd
         countdownTask = cd.runTaskTimer(plugin, 0, 20L)
@@ -40,7 +42,8 @@ class GameSession(private val arena: Arena) {
         countdownTask?.cancel()
         countdownTask = null
         countdown = null
-        arena.resetService.save()
+        // Save was started async in startCountdown - wait for it if still running
+        arena.resetService.waitForSave()
         val timer = GameTimer(arena, this)
         gameTimer = timer
         timerTask = timer.runTaskTimer(plugin, 0, 20L)
