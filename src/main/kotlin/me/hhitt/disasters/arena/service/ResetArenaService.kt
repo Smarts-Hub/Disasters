@@ -10,11 +10,14 @@ import com.sk89q.worldedit.function.operation.Operations
 import com.sk89q.worldedit.math.BlockVector3
 import com.sk89q.worldedit.regions.CuboidRegion
 import com.sk89q.worldedit.session.ClipboardHolder
+import me.hhitt.disasters.Disasters
 import me.hhitt.disasters.arena.Arena
 import me.hhitt.disasters.game.GameState
+import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.entity.Player
+import java.util.concurrent.CompletableFuture
 import kotlin.math.max
 import kotlin.math.min
 
@@ -33,6 +36,7 @@ class ResetArenaService(
     private val world = arena.corner1.world
     private lateinit var clipboard: Clipboard
     private lateinit var center: BlockVector3
+    private var saveFuture: CompletableFuture<Void>? = null
 
     private val minX = min(arena.corner1.x, arena.corner2.x).toInt()
     private val maxX = max(arena.corner1.x, arena.corner2.x).toInt()
@@ -47,22 +51,39 @@ class ResetArenaService(
         val min: BlockVector3 = BlockVector3.at(arena.corner1.x, arena.corner1.y, arena.corner1.z)
         val max: BlockVector3 = BlockVector3.at(arena.corner2.x, arena.corner2.y, arena.corner2.z)
         val region = CuboidRegion(min, max)
-        val clipboard = BlockArrayClipboard(region)
         val blockCount = region.volume
-        println("[Disasters] Saving arena '${arena.name}' blocks: $blockCount")
-        worldEdit!!.worldEdit.newEditSession(BukkitAdapter.adapt(world)).use { editSession ->
-            val forwardExtentCopy = ForwardExtentCopy(editSession, region, clipboard, region.minimumPoint)
-            try {
-                Operations.complete(forwardExtentCopy)
-            } catch (e: WorldEditException) {
-                throw RuntimeException(e)
+        println("[Disasters] Saving arena '${arena.name}' blocks: $blockCount (async)")
+
+        saveFuture = CompletableFuture.runAsync {
+            val clipboard = BlockArrayClipboard(region)
+            worldEdit!!.worldEdit.newEditSession(BukkitAdapter.adapt(world)).use { editSession ->
+                val forwardExtentCopy = ForwardExtentCopy(editSession, region, clipboard, region.minimumPoint)
+                try {
+                    Operations.complete(forwardExtentCopy)
+                } catch (e: WorldEditException) {
+                    throw RuntimeException(e)
+                }
+                this.clipboard = clipboard
+                this.center = region.minimumPoint
             }
-            this.clipboard = clipboard
-            this.center = region.minimumPoint
+            println("[Disasters] Save complete for '${arena.name}'")
+        }
+    }
+
+    fun waitForSave() {
+        saveFuture?.let { future ->
+            if (!future.isDone) {
+                println("[Disasters] Waiting for save to complete for '${arena.name}'...")
+                future.join()
+                println("[Disasters] Save complete, starting game for '${arena.name}'")
+            }
         }
     }
 
     fun paste() {
+        // Ensure save is complete before pasting
+        waitForSave()
+
         if (!::clipboard.isInitialized) {
             println("[Disasters] ERROR: Clipboard not initialized!")
             return
