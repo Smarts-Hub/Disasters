@@ -37,8 +37,12 @@ class Lightning : Disaster {
 
             val highestBlockY = world.getHighestBlockYAt(strikeLocation).toDouble()
             strikeLocation.y = highestBlockY
+
+            // Strikes the lightning (visuals + thunder sound)
             world.strikeLightning(strikeLocation)
-            strikeLocation.block.type = Material.AIR
+
+            //  Creates a TNT sized explosion that breaks terrain and hurts players
+            world.createExplosion(strikeLocation, 2f, false, true)
         }
     }
 
