@@ -60,10 +60,17 @@ class SidebarManager {
                     val disasters = arena.disasters
                     if (disasters.isNotEmpty()) {
                         parsed.add(Component.empty())
-                        parsed.add(Msg.parse("<gray>Disasters:", player))
+                        val header = config.getString("live.disasters-header", "<gray>Disasters:")!!
+                        parsed.add(Msg.parse(header, player))
+                        val format = config.getString("live.disaster-format", "<green>  %disaster_name%")!!
                         disasters.forEach { disaster ->
                             val name = formatDisasterName(disaster::class.simpleName ?: "Unknown")
-                            parsed.add(Msg.parse("<green>  $name", player))
+                            parsed.add(Msg.parse(format.replace("%disaster_name%", name), player))
+                        }
+                        val footer = config.getString("live.disasters-footer")
+                        if (footer != null) {
+                            parsed.add(Component.empty())
+                            parsed.add(Msg.parse(footer, player))
                         }
                     }
                 }

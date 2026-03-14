@@ -37,6 +37,12 @@ live:
     - ""
     - ""
     - "<blue>play.example.com"
+  # Header shown above the active disasters list (requires show-active-disasters: true in config.yml)
+  disasters-header: "<gray>Disasters:"
+  # Format for each active disaster. Use %disaster_name% for the disaster name.
+  disaster-format: "<green>  %disaster_name%"
+  # Optional line shown below the disasters list. Remove to disable.
+  disasters-footer: "<blue>play.example.com"
 
 restarting:
   title: "<gold><bold>Disasters"
