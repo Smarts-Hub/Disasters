@@ -36,6 +36,25 @@ spawn:
   pitch: 0
   world: world
 
+# spawns (optional) - if present, players will teleport to a random spawn point from this list when joining.
+# If not present, the single spawn above is used instead.
+# Players will still respawn at the default spawn above when they die.
+spawns:
+  1:
+    x: 10
+    y: 0
+    z: 10
+    yaw: 0
+    pitch: 0
+    world: world
+  2:
+    x: -10
+    y: 0
+    z: -10
+    yaw: 180
+    pitch: 0
+    world: world
+
 # corner1 and corner2 are the locations that define the arena region.
 corner1:
   x: 0

@@ -76,6 +76,22 @@ class ArenaManager(private val worldEdit: WorldEditPlugin?) {
                 arenaConfig.getInt("spawn.yaw").toFloat(),
                 arenaConfig.getInt("spawn.pitch").toFloat()
             )
+            // Load multiple spawn points if defined
+            val spawns = mutableListOf<Location>()
+            if (arenaConfig.contains("spawns")) {
+                val spawnsSection = arenaConfig.getConfigurationSection("spawns")!!
+                for (key in spawnsSection.getKeys(false)) {
+                    val s = spawnsSection.getConfigurationSection(key)!!
+                    spawns.add(Location(
+                        Bukkit.getWorld(s.getString("world")!!),
+                        s.getDouble("x"),
+                        s.getDouble("y"),
+                        s.getDouble("z"),
+                        s.getInt("yaw").toFloat(),
+                        s.getInt("pitch").toFloat()
+                    ))
+                }
+            }
             val corner1 = Location(
                 plugin.server.getWorld(arenaConfig.getString("corner1.world")!!),
                 arenaConfig.getDouble("corner1.x"),
@@ -94,7 +110,7 @@ class ArenaManager(private val worldEdit: WorldEditPlugin?) {
             val toAllCommands = arenaConfig.getStringList("to-all-commands")
 
             val arena = Arena(arenaID, displayName, minPlayers, maxPlayers, aliveToEnd, gameTime, countdown, disasterRate,
-                maxDisasters, location, corner1, corner2, winnersCommands, losersCommands, toAllCommands, worldEdit)
+                maxDisasters, location, spawns, corner1, corner2, winnersCommands, losersCommands, toAllCommands, worldEdit)
 
             arenas.add(arena)
         }
