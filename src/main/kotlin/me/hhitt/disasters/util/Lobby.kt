@@ -8,6 +8,8 @@ import org.bukkit.GameMode
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import java.io.ByteArrayOutputStream
+import java.io.DataOutputStream
 import java.util.UUID
 
 object Lobby {
@@ -65,7 +67,27 @@ object Lobby {
     }
 
     fun teleportPlayer(player: Player) {
+        if (isBungeeEnabled()) {
+            // Reset player state before sending to another server
+            resetPlayerState(player)
+            sendToServer(player)
+            return
+        }
+
         player.teleport(location)
+        resetPlayerState(player)
+    }
+
+    fun teleportAtEnd(arena: Arena) {
+        Bukkit.getScheduler().runTaskLater(Disasters.getInstance(), Runnable {
+            arena.playing.forEach {
+                teleportPlayer(it)
+            }
+            arena.clear()
+        }, 60L)
+    }
+
+    private fun resetPlayerState(player: Player) {
         player.activePotionEffects.clear()
         // Try to restore inventory if previously saved; otherwise clear
         if (!restorePlayerState(player)) {
@@ -78,14 +100,18 @@ object Lobby {
         player.exp = 0.0f
         player.gameMode = GameMode.SURVIVAL
         player.activePotionEffects.clear()
-     }
+    }
 
-    fun teleportAtEnd(arena: Arena) {
-        Bukkit.getScheduler().runTaskLater(Disasters.getInstance(), Runnable {
-            arena.playing.forEach {
-                teleportPlayer(it)
-            }
-            arena.clear()
-        }, 60L)
+    private fun isBungeeEnabled(): Boolean {
+        return FileManager.get("config")!!.getBoolean("bungee.enabled", false)
+    }
+
+    private fun sendToServer(player: Player) {
+        val serverName = FileManager.get("config")!!.getString("bungee.server", "lobby")!!
+        val out = ByteArrayOutputStream()
+        val data = DataOutputStream(out)
+        data.writeUTF("Connect")
+        data.writeUTF(serverName)
+        player.sendPluginMessage(Disasters.getInstance(), "BungeeCord", out.toByteArray())
     }
 }
