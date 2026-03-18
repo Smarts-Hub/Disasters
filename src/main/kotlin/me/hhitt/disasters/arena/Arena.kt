@@ -47,6 +47,7 @@ class Arena(
     val rate: Int,
     val maxDisasters: Int,
     val location: Location,
+    val spawns: List<Location> = listOf(),
     val corner1: Location,
     val corner2: Location,
     val winnersCommands: List<String>,
@@ -73,7 +74,8 @@ class Arena(
 
         playing.add(player)
         alive.add(player)
-        player.teleport(location)
+        val spawn = if (spawns.isNotEmpty()) spawns.random() else location
+        player.teleport(spawn)
         Notify.playerJoined(player, this)
         if(playing.size == minPlayers) {
             start()
