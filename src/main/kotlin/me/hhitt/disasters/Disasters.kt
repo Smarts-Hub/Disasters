@@ -39,6 +39,7 @@ class Disasters : ZapperJavaPlugin() {
         registerCommands()
         registerListeners()
         initDisasters()
+        initBungee()
         ItemDropManager.loadConfig()
     }
 
@@ -96,6 +97,13 @@ class Disasters : ZapperJavaPlugin() {
 
     private fun initDisasters() {
         DisasterTask().runTaskTimer(this, 0, 20)
+    }
+
+    private fun initBungee() {
+        if (FileManager.get("config")!!.getBoolean("bungee.enabled", false)) {
+            server.messenger.registerOutgoingPluginChannel(this, "BungeeCord")
+            logger.info("BungeeCord mode enabled! Players will be sent to server: ${FileManager.get("config")!!.getString("bungee.server", "lobby")}")
+        }
     }
 
 }

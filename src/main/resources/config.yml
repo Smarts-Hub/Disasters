@@ -18,6 +18,7 @@ database:
   password: passw0rD
 
 # This is the location where players will return after the game ends
+# (Used when bungee mode is disabled)
 lobby:
   world: world
   x: 0
@@ -25,6 +26,13 @@ lobby:
   z: 0
   yaw: 0
   pitch: 0
+
+# BungeeCord/Velocity support
+# When enabled, players are sent to a different backend server at game end
+# instead of being teleported to the lobby location above.
+bungee:
+  enabled: false
+  server: "lobby"
 
 enable-scoreboard: true
 # Voting system settings
