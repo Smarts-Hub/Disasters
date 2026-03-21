@@ -39,7 +39,7 @@ object DisasterRegistry {
         FloorIsLava::class,
         Grounded::class,
         Lightning::class,
-        OneHearth::class,
+        OneHearth::class,   
         Swap::class,
         WorldBorder::class
     )

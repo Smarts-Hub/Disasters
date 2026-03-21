@@ -36,6 +36,9 @@ voting:
   
 show-active-disasters: false
 
+# Enable or disable item drops during games (configure drops in item-drops.yml)
+enable-item-drops: true
+
 # Damage dealt by the Hot Sun disaster every second (0.5 = 1/4 heart)
 hot-sun-damage: 0.5
 

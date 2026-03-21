@@ -6,6 +6,7 @@ import me.hhitt.disasters.arena.ArenaManager
 import me.hhitt.disasters.command.ArenaCommand
 import me.hhitt.disasters.command.DisastersCommand
 import me.hhitt.disasters.disaster.DisasterTask
+import me.hhitt.disasters.game.drop.ItemDropManager
 import me.hhitt.disasters.hook.PlaceholderAPIHook
 import me.hhitt.disasters.listener.*
 import me.hhitt.disasters.sidebar.SidebarService
@@ -38,9 +39,11 @@ class Disasters : ZapperJavaPlugin() {
         registerCommands()
         registerListeners()
         initDisasters()
+        ItemDropManager.loadConfig()
     }
 
     override fun onDisable() {
+        ItemDropManager.clearAll()
     }
 
     private fun initHooks () {
