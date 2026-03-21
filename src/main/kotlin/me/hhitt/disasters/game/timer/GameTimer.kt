@@ -9,6 +9,7 @@ import me.hhitt.disasters.disaster.impl.BlockDisappear
 import me.hhitt.disasters.disaster.impl.FloorIsLava
 import me.hhitt.disasters.game.GameSession
 import me.hhitt.disasters.game.GameState
+import me.hhitt.disasters.game.drop.ItemDropManager
 import me.hhitt.disasters.storage.data.Data
 import me.hhitt.disasters.util.Lobby
 import me.hhitt.disasters.util.Notify
@@ -61,6 +62,8 @@ class GameTimer(private val arena: Arena, private val session: GameSession) : Bu
             }
         }
 
+        ItemDropManager.pulse(arena, time)
+
         time++
     }
 
@@ -107,6 +110,7 @@ class GameTimer(private val arena: Arena, private val session: GameSession) : Bu
         super.cancel()
         Notify.gameEnd(arena)
         DisasterRegistry.removeDisasters(arena)
+        ItemDropManager.clearDrops(arena)
         time = 0
         arena.state = GameState.RECRUITING
         arena.resetService.paste()

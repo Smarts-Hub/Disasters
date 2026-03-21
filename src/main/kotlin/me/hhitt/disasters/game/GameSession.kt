@@ -3,6 +3,7 @@ package me.hhitt.disasters.game
 import me.hhitt.disasters.Disasters
 import me.hhitt.disasters.arena.Arena
 import me.hhitt.disasters.game.countdown.Countdown
+import me.hhitt.disasters.game.drop.ItemDropManager
 import me.hhitt.disasters.game.timer.GameTimer
 import org.bukkit.scheduler.BukkitTask
 
@@ -44,6 +45,8 @@ class GameSession(private val arena: Arena) {
         countdown = null
         // Save was started async in startCountdown - wait for it if still running
         arena.resetService.waitForSave()
+        // Clean up any orphaned drop entities from a previous crash
+        ItemDropManager.cleanOrphanedEntities(arena)
         val timer = GameTimer(arena, this)
         gameTimer = timer
         timerTask = timer.runTaskTimer(plugin, 0, 20L)
@@ -56,6 +59,7 @@ class GameSession(private val arena: Arena) {
         timerTask = null
         countdown = null
         gameTimer = null
+        ItemDropManager.clearDrops(arena)
         arena.state = GameState.RECRUITING
     }
 

@@ -1,0 +1,97 @@
+#    ____  _                 __
+#   / __ \(_)________ ______/ /____  __________
+#  / / / / / ___/ __ `/ ___/ __/ _ \/ ___/ ___/
+# / /_/ / (__  ) /_/ (__  ) /_/  __/ /  (__  )
+#/_____/_/____/\__,_/____/\__/\___/_/  /____/
+# Item Drops Configuration
+# Items will randomly spawn in arenas during disasters
+
+# Enable or disable item drops globally
+enabled: true
+
+# Time in seconds between item drop spawns
+drop-rate: 20
+
+# Max number of players that get a drop each cycle
+# If there are 20 players and this is 10, only 10 random players get a drop per cycle
+max-players-per-cycle: 10
+
+# Time in seconds before a dropped item despawns if not picked up
+despawn-time: 30
+
+# How far from a player items can spawn (in blocks)
+spawn-radius: 15
+
+# Make dropped items glow (enchant shimmer outline)
+glow: true
+
+# Rarity tiers - each tier has a % chance, a name color (MiniMessage), and a list of items
+# The chances should add up to 100
+# Format: MATERIAL_NAME or MATERIAL_NAME:AMOUNT or POTION:EFFECT or SPLASH_POTION:EFFECT
+tiers:
+  common:
+    chance: 60
+    color: "<white>"
+    items:
+      # -- Food --
+      - COOKED_BEEF
+      - MILK_BUCKET
+      - POTION:FIRE_RESISTANCE
+      #- COOKED_PORKCHOP
+      #- COOKED_CHICKEN
+      #- COOKED_MUTTON
+      #- COOKED_SALMON
+      #- COOKED_COD
+      #- BAKED_POTATO
+      #- BREAD
+      #- PUMPKIN_PIE
+      #- COOKIE:3
+      #- APPLE
+      #- MELON_SLICE:3
+      #- DRIED_KELP:3
+      #- SWEET_BERRIES:3
+      #- HONEY_BOTTLE
+      #- MUSHROOM_STEW
+      #- BEETROOT_SOUP
+
+  uncommon:
+    chance: 30
+    color: "<gold>"
+    items:
+      # -- Healing & Buffs --
+      - GOLDEN_APPLE
+      - POTION:INSTANT_HEAL
+      - SPLASH_POTION:FIRE_RESISTANCE
+      - ENDER_PEARL
+      - SHIELD
+      - WATER_BUCKET
+      #- GOLDEN_CARROT
+      #- RABBIT_STEW
+      #- POTION:SWIFTNESS
+      #- SPLASH_POTION:SWIFTNESS
+      #- POTION:SLOW_FALLING
+      #- SPLASH_POTION:SLOW_FALLING
+      #- POTION:REGENERATION
+      #- SPLASH_POTION:REGENERATION
+      #- POTION:NIGHT_VISION
+      #- POTION:WATER_BREATHING
+      #- POTION:LEAPING
+      #- SPLASH_POTION:HEALING
+
+  rare:
+    chance: 10
+    color: "<light_purple>"
+    items:
+      # -- Powerful --
+      - ENCHANTED_GOLDEN_APPLE
+      - SPLASH_POTION:INSTANT_HEAL
+      #- TOTEM_OF_UNDYING
+      #- ELYTRA
+      #- CHORUS_FRUIT
+      #- LINGERING_POTION:HEALING
+      #- LINGERING_POTION:REGENERATION
+      #- SPLASH_POTION:LEAPING
+      #- TURTLE_HELMET
+
+# DO NOT TOUCH THIS!
+config-version: 2

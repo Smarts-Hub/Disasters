@@ -1,6 +1,7 @@
 package me.hhitt.disasters.command
 
 import me.hhitt.disasters.arena.ArenaManager
+import me.hhitt.disasters.game.drop.ItemDropManager
 import me.hhitt.disasters.sidebar.SidebarService
 import me.hhitt.disasters.storage.file.FileManager
 import me.hhitt.disasters.util.Lobby
@@ -27,6 +28,7 @@ class DisastersCommand(private val arenaManager: ArenaManager, private val sideb
         FileManager.get("lang")!!.reloadFile()
         arenaManager.reloadArenas()
         sidebarService.updateSidebar()
+        ItemDropManager.loadConfig()
         Msg.send(actor.sender(), "reload-success")
     }
 
