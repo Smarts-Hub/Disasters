@@ -1,4 +1,56 @@
-# Project exclude paths
-/.gradle/
-/build/
-/build/classes/kotlin/main/
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# Kotlin
+.kotlin/
+*.kotlin_module
+
+# Eclipse
+.settings/
+.project
+.classpath
+
+# NetBeans
+nbproject/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+tmp/
+temp/
+
+# Gradle properties (may contain sensitive data)
+gradle.properties
+
+# Maven (if used)
+.mvn/
+.mvn/wrapper/
+
+# Others
+bin/
+target/
+.springBeans
