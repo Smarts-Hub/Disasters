@@ -80,16 +80,18 @@ class ArenaManager(private val worldEdit: WorldEditPlugin?) {
             val spawns = mutableListOf<Location>()
             if (arenaConfig.contains("spawns")) {
                 val spawnsSection = arenaConfig.getConfigurationSection("spawns")!!
-                for (key in spawnsSection.getKeys(false)) {
-                    val s = spawnsSection.getConfigurationSection(key)!!
-                    spawns.add(Location(
-                        Bukkit.getWorld(s.getString("world")!!),
-                        s.getDouble("x"),
-                        s.getDouble("y"),
-                        s.getDouble("z"),
-                        s.getInt("yaw").toFloat(),
-                        s.getInt("pitch").toFloat()
-                    ))
+                if (spawnsSection != null) {
+                    for (key in spawnsSection.getKeys(false)) {
+                        val s = spawnsSection.getConfigurationSection(key)!!
+                        spawns.add(Location(
+                            Bukkit.getWorld(s.getString("world")!!),
+                            s.getDouble("x"),
+                            s.getDouble("y"),
+                            s.getDouble("z"),
+                            s.getInt("yaw").toFloat(),
+                            s.getInt("pitch").toFloat()
+                        ))
+                    }
                 }
             }
             val corner1 = Location(
