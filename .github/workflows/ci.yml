@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+          cache: maven
+
+      - name: Make Maven Wrapper executable
+        run: chmod +x mvnw
+
+      - name: Repository residue gate
+        run: |
+          bad=$(find . -path './.git' -prune -o -type f \( \
+            -name '*.kt' -o -name '*.kts' -o -name 'gradlew' -o -name 'gradlew.bat' -o \
+            -name 'gradle-wrapper.jar' -o -name 'gradle-wrapper.properties' -o \
+            -name '.factorypath' -o -name '.classpath' -o -name '.project' \
+          \) -print)
+          if [ -n "$bad" ]; then
+            printf 'RESIDUE_DETECTED:\n%s\n' "$bad"
+            exit 1
+          fi
+          if [ ! -f mvnw ] || [ ! -f .mvn/wrapper/maven-wrapper.properties ]; then
+            printf 'MISSING_MAVEN_WRAPPER\n'
+            exit 1
+          fi
+          printf 'RESIDUE_GATE_PASSED\n'
+
+      - name: Build with Maven
+        run: ./mvnw -B -ntp clean verify

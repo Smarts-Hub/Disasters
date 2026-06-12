@@ -7,6 +7,8 @@ messages:
   arena-not-found: "<red>Arena not found!"
   arena-in-game: "<red>Arena is in game!"
   arena-full: "<red>Arena is full!"
+  no-available-arena: "<red>No available arena found!"
+  reload-blocked-active-arenas: "<red>Cannot reload arenas while some arenas are still active!"
   arena-joined: "<green>You have joined the arena!"
   arena-left: "<red>You have left the arena!"
   now-murder: "<green>Now you are a murder!"

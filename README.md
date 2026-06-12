@@ -32,8 +32,19 @@ For more details, please refer to the full license text here:
 
 ## 🧑‍💻 Code Style
 
-Please follow the java conventions for any contributions. This helps maintain readability and consistency across the codebase.
-Also use kotlin for new code, we won't accept Java.
+This project is written in **Java** using Java 8-style syntax with a JDK 21 runtime target (required by Paper 1.21.8).
+
+Please follow Java conventions for any contributions. Use Java 8-compatible language constructs — no records, sealed classes, pattern matching, switch expressions, text blocks, `var`, `List.of`, `Map.of`, or `Stream.toList`.
+
+Build with the Maven wrapper:
+
+```shell
+./mvnw clean verify
+```
+
+**Requirements:** JDK 21, Paper 1.21.8.
+
+Do not add Gradle, Kotlin, or NMS code.
 
 ---
 

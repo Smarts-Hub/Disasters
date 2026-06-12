@@ -1,56 +1,38 @@
-# Gradle
+# Maven outputs
+target/
+
+# Removed build-system residue; never recommit
 .gradle/
-build/
-!gradle/wrapper/gradle-wrapper.jar
-
-# IntelliJ IDEA
-.idea/
-*.iws
-*.iml
-*.ipr
-out/
-
-# Kotlin
 .kotlin/
-*.kotlin_module
+build/
+gradle/
+gradlew
+gradlew.bat
+build.gradle
+build.gradle.kts
+settings.gradle
+settings.gradle.kts
+gradle.properties
 
-# Eclipse
+# IDE
+.idea/
 .settings/
 .project
 .classpath
-
-# NetBeans
-nbproject/
-nbbuild/
-dist/
-nbdist/
-.nb-gradle/
-
-# VS Code
+.factorypath
+*.iml
+*.ipr
+*.iws
 .vscode/
+out/
+bin/
 
-# OS
+# OS/log/temp
 .DS_Store
 Thumbs.db
-
-# Logs
 *.log
-
-# Temporary files
 *.tmp
 *.temp
 .cache/
 tmp/
 temp/
-
-# Gradle properties (may contain sensitive data)
-gradle.properties
-
-# Maven (if used)
-.mvn/
-.mvn/wrapper/
-
-# Others
-bin/
-target/
-.springBeans
