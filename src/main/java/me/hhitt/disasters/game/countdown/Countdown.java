@@ -8,7 +8,6 @@ import me.hhitt.disasters.storage.file.FileManager;
 import me.hhitt.disasters.util.Notify;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.Collections;
 import java.util.List;
 
 public final class Countdown extends BukkitRunnable {
@@ -46,12 +45,7 @@ public final class Countdown extends BukkitRunnable {
             if (time >= (arena.getCountdown() + 2)) {
                 Notify.gameStart(arena);
 
-                final List<String> selectedModifications = voteManager != null
-                    ? voteManager.resolveVote()
-                    : Collections.<String>emptyList();
-                voteManager = null;
-
-                session.startGameTimer(selectedModifications);
+                session.startGameTimer(resolveVoteNow());
                 return;
             }
             time++;
@@ -65,7 +59,9 @@ public final class Countdown extends BukkitRunnable {
 
         if (time == 0 && voteManager == null) {
             final me.hhitt.disasters.storage.file.Configuration cfg = FileManager.get("config");
-            if (cfg != null && cfg.getBoolean("game-modifications.voting.enabled", true)) {
+            if (cfg != null
+                && cfg.getBoolean("game-modifications.voting.enabled", true)
+                && cfg.getBoolean("game-modifications.voting.open-at-countdown-start", true)) {
                 final GameModificationVoteManager manager = new GameModificationVoteManager(arena);
                 manager.startVote();
                 voteManager = manager;
@@ -75,5 +71,18 @@ public final class Countdown extends BukkitRunnable {
         Notify.countdown(arena, remaining);
         time++;
         remaining--;
+    }
+
+    public List<String> resolveVoteNow() {
+        if (voteManager != null) {
+            final List<String> selected = voteManager.resolveVote();
+            voteManager = null;
+            return selected;
+        }
+        final me.hhitt.disasters.storage.file.Configuration cfg = FileManager.get("config");
+        if (cfg != null && cfg.getBoolean("game-modifications.voting.enabled", true)) {
+            return GameModificationVoteManager.resolveDefaultSelection(arena);
+        }
+        return java.util.Collections.<String>emptyList();
     }
 }

@@ -7,6 +7,7 @@ import me.hhitt.disasters.arena.service.RespawnService;
 import me.hhitt.disasters.disaster.Disaster;
 import me.hhitt.disasters.disaster.impl.WorldBorder;
 import me.hhitt.disasters.game.FinishReason;
+import me.hhitt.disasters.game.ForceStartResult;
 import me.hhitt.disasters.game.GameSession;
 import me.hhitt.disasters.game.GameState;
 import me.hhitt.disasters.game.modification.GameModification;
@@ -19,6 +20,7 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class Arena {
@@ -40,6 +42,7 @@ public final class Arena {
     private final List<String> winnersCommands;
     private final List<String> losersCommands;
     private final List<String> toAllCommands;
+    private final ArenaDisasterSettings disasterSettings;
 
     private final List<Player> playing = new ArrayList<>();
     private final List<Player> alive = new ArrayList<>();
@@ -70,6 +73,7 @@ public final class Arena {
         final List<String> winnersCommands,
         final List<String> losersCommands,
         final List<String> toAllCommands,
+        final ArenaDisasterSettings disasterSettings,
         final WorldEditPlugin worldEdit
     ) {
         this.name = name;
@@ -89,6 +93,7 @@ public final class Arena {
         this.winnersCommands = winnersCommands;
         this.losersCommands = losersCommands;
         this.toAllCommands = toAllCommands;
+        this.disasterSettings = Objects.requireNonNull(disasterSettings, "disasterSettings");
         this.borderService = new BorderService(corner1, corner2);
         this.resetService = new ResetArenaService(this, worldEdit);
         this.respawnService = new RespawnService(this);
@@ -161,6 +166,10 @@ public final class Arena {
 
     public List<String> getToAllCommands() {
         return toAllCommands;
+    }
+
+    public ArenaDisasterSettings getDisasterSettings() {
+        return disasterSettings;
     }
 
     public List<Player> getPlaying() {
@@ -280,6 +289,10 @@ public final class Arena {
 
     public void start() {
         gameSession.start();
+    }
+
+    public ForceStartResult forceStart() {
+        return gameSession.forceStartNow();
     }
 
     public void stop() {

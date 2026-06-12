@@ -9,6 +9,13 @@ messages:
   arena-full: "<red>Arena is full!"
   no-available-arena: "<red>No available arena found!"
   reload-blocked-active-arenas: "<red>Cannot reload arenas while some arenas are still active!"
+  force-start-success: "<green>Force-started arena %arena%!"
+  force-start-empty: "<red>Cannot force-start an empty arena!"
+  force-start-already-live: "<red>Arena %arena% is already live!"
+  force-start-restarting: "<red>Arena %arena% is restarting!"
+  catalog-disasters-header: "<gold>Disaster catalog:"
+  catalog-modifications-header: "<gold>Game modification catalog:"
+  definition-toggle-success: "<green>%kind% %id% is now %state% for %scope%!"
   arena-joined: "<green>You have joined the arena!"
   arena-left: "<red>You have left the arena!"
   now-murder: "<green>Now you are a murder!"
@@ -119,6 +126,13 @@ disaster:
     chat:
       - "<gold>----------------------------------"
       - "<red>Swapper! Positions will swap!"
+      - "<gold>----------------------------------"
+  pvp:
+    title: "<red>PvP!"
+    subtitle: "<red>Players can now fight!"
+    chat:
+      - "<gold>----------------------------------"
+      - "<red>PvP! Players can now damage each other!"
       - "<gold>----------------------------------"
   world-border:
     title: "<red>World Border!"

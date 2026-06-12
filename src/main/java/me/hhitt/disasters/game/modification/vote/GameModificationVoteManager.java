@@ -22,12 +22,10 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 public class GameModificationVoteManager implements Listener {
 
@@ -45,6 +43,7 @@ public class GameModificationVoteManager implements Listener {
         enabled = GameModificationRegistry.enabledDefinitions(arena);
         if (enabled.isEmpty()) {
             resolved = true;
+            closeAndUnregister();
             return;
         }
         Bukkit.getPluginManager().registerEvents(this, Disasters.getInstance());
@@ -143,14 +142,8 @@ public class GameModificationVoteManager implements Listener {
     }
 
     public void cancelVote() {
-        for (final UUID uuid : openInventories.keySet()) {
-            final Player player = Bukkit.getPlayer(uuid);
-            if (player != null) {
-                player.closeInventory();
-            }
-        }
-        openInventories.clear();
-        HandlerList.unregisterAll(this);
+        closeAndUnregister();
+        votes.clear();
         resolved = true;
     }
 
@@ -159,7 +152,29 @@ public class GameModificationVoteManager implements Listener {
             return Collections.emptyList();
         }
         resolved = true;
+        closeAndUnregister();
 
+        final Configuration cfg = FileManager.get("config");
+        final boolean allowDefault = cfg != null && cfg.getBoolean("game-modifications.voting.allow-no-vote-default", true);
+        final String defaultId = cfg != null ? cfg.getString("game-modifications.voting.default", "") : "";
+        final List<String> result = GameModificationSelectionPolicy.select(enabled, votes, allowDefault, defaultId);
+        votes.clear();
+        return result;
+    }
+
+    public static List<String> resolveDefaultSelection(final Arena arena) {
+        final Configuration cfg = FileManager.get("config");
+        final boolean allowDefault = cfg != null && cfg.getBoolean("game-modifications.voting.allow-no-vote-default", true);
+        final String defaultId = cfg != null ? cfg.getString("game-modifications.voting.default", "") : "";
+        return GameModificationSelectionPolicy.select(
+            GameModificationRegistry.enabledDefinitions(arena),
+            Collections.<UUID, String>emptyMap(),
+            allowDefault,
+            defaultId
+        );
+    }
+
+    private void closeAndUnregister() {
         for (final UUID uuid : openInventories.keySet()) {
             final Player player = Bukkit.getPlayer(uuid);
             if (player != null) {
@@ -168,49 +183,5 @@ public class GameModificationVoteManager implements Listener {
         }
         openInventories.clear();
         HandlerList.unregisterAll(this);
-
-        if (enabled.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        final Configuration cfg = FileManager.get("config");
-        final boolean allowDefault = cfg != null && cfg.getBoolean("game-modifications.voting.allow-no-vote-default", true);
-
-        final String winner;
-        if (!votes.isEmpty()) {
-            final Map<String, Long> counts = votes.values().stream()
-                .collect(Collectors.groupingBy(id -> id, Collectors.counting()));
-            final Map.Entry<String, Long> maxEntry = counts.entrySet().stream()
-                .max(Comparator.comparing(Map.Entry::getValue))
-                .orElse(null);
-            if (maxEntry != null) {
-                winner = maxEntry.getKey();
-            } else {
-                winner = enabled.get(0).getId();
-            }
-        } else if (allowDefault) {
-            final String defaultId = cfg != null ? cfg.getString(
-                "game-modifications.voting.default", enabled.get(0).getId()
-            ) : enabled.get(0).getId();
-            boolean found = false;
-            for (final GameModificationDefinition def : enabled) {
-                if (def.getId().equals(defaultId)) {
-                    found = true;
-                    break;
-                }
-            }
-            if (found) {
-                winner = defaultId;
-            } else {
-                winner = enabled.get(0).getId();
-            }
-        } else {
-            winner = enabled.get(0).getId();
-        }
-
-        votes.clear();
-        final List<String> result = new ArrayList<String>();
-        result.add(winner);
-        return result;
     }
 }

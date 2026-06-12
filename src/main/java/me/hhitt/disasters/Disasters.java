@@ -5,9 +5,14 @@ import me.hhitt.disasters.arena.Arena;
 import me.hhitt.disasters.arena.ArenaManager;
 import me.hhitt.disasters.command.ArenaCommand;
 import me.hhitt.disasters.command.DisastersCommand;
+import me.hhitt.disasters.command.parameter.ArenaParameterType;
+import me.hhitt.disasters.command.parameter.DisasterDefinitionParameterType;
+import me.hhitt.disasters.command.parameter.GameModificationDefinitionParameterType;
+import me.hhitt.disasters.disaster.DisasterDefinition;
 import me.hhitt.disasters.disaster.DisasterTask;
 import me.hhitt.disasters.game.FinishReason;
 import me.hhitt.disasters.game.drop.ItemDropManager;
+import me.hhitt.disasters.game.modification.GameModificationDefinition;
 import me.hhitt.disasters.hook.PlaceholderAPIHook;
 import me.hhitt.disasters.listener.BlockBreakListener;
 import me.hhitt.disasters.listener.BlockPlaceListener;
@@ -22,6 +27,7 @@ import me.hhitt.disasters.listener.PlayerJoinListener;
 import me.hhitt.disasters.listener.PlayerJumpListener;
 import me.hhitt.disasters.listener.PlayerLeaveListener;
 import me.hhitt.disasters.listener.PlayerMoveListener;
+import me.hhitt.disasters.service.DefinitionToggleService;
 import me.hhitt.disasters.sidebar.SidebarService;
 import me.hhitt.disasters.storage.data.Data;
 import me.hhitt.disasters.storage.file.Configuration;
@@ -112,8 +118,14 @@ public final class Disasters extends JavaPlugin {
     }
 
     private void registerCommands() {
-        final Lamp<BukkitCommandActor> lamp = BukkitLamp.builder(this).build();
-        lamp.register(new ArenaCommand(arenaManager), new DisastersCommand(arenaManager, sidebarService));
+        final DefinitionToggleService definitionToggleService = new DefinitionToggleService();
+        final Lamp<BukkitCommandActor> lamp = BukkitLamp.builder(this)
+            .parameterTypes(builder -> builder
+                .addParameterType(Arena.class, new ArenaParameterType(arenaManager))
+                .addParameterType(DisasterDefinition.class, new DisasterDefinitionParameterType())
+                .addParameterType(GameModificationDefinition.class, new GameModificationDefinitionParameterType()))
+            .build();
+        lamp.register(new ArenaCommand(arenaManager), new DisastersCommand(arenaManager, sidebarService, definitionToggleService));
     }
 
     private void registerListeners() {

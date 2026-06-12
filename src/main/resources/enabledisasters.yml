@@ -46,6 +46,7 @@ default:
   game-modifications:
     one-heart: true
     swapper: true
+    pvp: true
 
 arenas:
   example_arena:

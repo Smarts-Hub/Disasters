@@ -2,12 +2,16 @@ package me.hhitt.disasters.command;
 
 import me.hhitt.disasters.arena.Arena;
 import me.hhitt.disasters.arena.ArenaManager;
+import me.hhitt.disasters.game.ForceStartResult;
 import me.hhitt.disasters.util.Msg;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import revxrsal.commands.annotation.Command;
 import revxrsal.commands.annotation.Subcommand;
 import revxrsal.commands.bukkit.actor.BukkitCommandActor;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Command("arena")
 public final class ArenaCommand {
@@ -19,7 +23,7 @@ public final class ArenaCommand {
     }
 
     @Subcommand("join <arena>")
-    public void join(final BukkitCommandActor actor, final String arena) {
+    public void join(final BukkitCommandActor actor, final Arena target) {
         if (!actor.isPlayer()) return;
         final Player player = actor.asPlayer();
 
@@ -28,17 +32,12 @@ public final class ArenaCommand {
             return;
         }
 
-        final Arena target = arenaManager.getArena(arena);
-        if (target != null) {
-            if (!target.addPlayer(player)) {
-                if (target.isFull()) {
-                    Msg.send(player, "arena-full");
-                } else {
-                    Msg.send(player, "arena-in-game");
-                }
+        if (!target.addPlayer(player)) {
+            if (target.isFull()) {
+                Msg.send(player, "arena-full");
+            } else {
+                Msg.send(player, "arena-in-game");
             }
-        } else {
-            Msg.send(player, "arena-not-found");
         }
     }
 
@@ -81,7 +80,7 @@ public final class ArenaCommand {
                 Msg.send(player, "no-permission");
                 return;
             }
-            arena.start();
+            sendForceStartResult(player, arena, arena.forceStart());
         } else {
             Msg.send(player, "not-in-arena");
         }
@@ -105,34 +104,49 @@ public final class ArenaCommand {
     }
 
     @Subcommand("forcestart <arena>")
-    public void forceStart(final BukkitCommandActor actor, final String arena) {
+    public void forceStart(final BukkitCommandActor actor, final Arena target) {
         final CommandSender sender = actor.sender();
 
-        final Arena target = arenaManager.getArena(arena);
-        if (target != null) {
-            if (!sender.hasPermission("disasters.forcestart")) {
-                Msg.send(sender, "no-permission");
-                return;
-            }
-            target.start();
-        } else {
-            Msg.send(sender, "arena-not-found");
+        if (!sender.hasPermission("disasters.forcestart")) {
+            Msg.send(sender, "no-permission");
+            return;
         }
+        sendForceStartResult(sender, target, target.forceStart());
     }
 
     @Subcommand("forcestop <arena>")
-    public void forceStop(final BukkitCommandActor actor, final String arena) {
+    public void forceStop(final BukkitCommandActor actor, final Arena target) {
         final CommandSender sender = actor.sender();
 
-        final Arena target = arenaManager.getArena(arena);
-        if (target != null) {
-            if (!sender.hasPermission("disasters.forcestop")) {
-                Msg.send(sender, "no-permission");
-                return;
-            }
-            target.stop();
-        } else {
-            Msg.send(sender, "arena-not-found");
+        if (!sender.hasPermission("disasters.forcestop")) {
+            Msg.send(sender, "no-permission");
+            return;
         }
+        target.stop();
+    }
+
+    private void sendForceStartResult(final CommandSender sender, final Arena arena, final ForceStartResult result) {
+        final String path;
+        switch (result) {
+            case STARTED:
+                path = "force-start-success";
+                break;
+            case EMPTY:
+                path = "force-start-empty";
+                break;
+            case ALREADY_LIVE:
+                path = "force-start-already-live";
+                break;
+            case RESTARTING:
+                path = "force-start-restarting";
+                break;
+            default:
+                path = "force-start-restarting";
+                break;
+        }
+
+        final Map<String, String> replacements = new HashMap<String, String>();
+        replacements.put("%arena%", arena.getName());
+        Msg.send(sender, path, replacements);
     }
 }

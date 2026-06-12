@@ -82,6 +82,17 @@ jump-pads:
     cooldown-ticks: 20
 
 
+disasters:
+  # Absolute world Y where first water layer begins.
+  # Omit to auto-resolve one block below lowest configured spawn.
+  flood:
+    start-y: 0
+  # Absolute world Y where first lava layer begins.
+  # Omit to use same automatic rule.
+  lava-rising:
+    start-y: 0
+
+
 # It will parse the placeholders to player, executed per one
 commands:
   # Executed one time per winner

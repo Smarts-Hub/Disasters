@@ -45,11 +45,15 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -57,13 +61,18 @@ public final class DisasterRegistry {
 
     private static final ConcurrentHashMap<Arena, CopyOnWriteArrayList<ActiveDisaster>> activeDisasters = new ConcurrentHashMap<>();
 
-    private static final List<DisasterDefinition> definitions = new ArrayList<>();
+    private static final List<DisasterDefinition> DEFINITIONS = buildDefinitions();
+
+    private static final Map<String, DisasterDefinition> DEFINITIONS_BY_ID = buildDefinitionsById(DEFINITIONS);
+
+    private static final Set<String> DEFINITION_IDS = Collections.unmodifiableSet(new LinkedHashSet<String>(DEFINITIONS_BY_ID.keySet()));
 
     private static final Set<Arena> noDisasterWarned = Collections.synchronizedSet(new HashSet<Arena>());
 
     private static final Random RANDOM = new Random();
 
-    static {
+    private static List<DisasterDefinition> buildDefinitions() {
+        final List<DisasterDefinition> definitions = new ArrayList<DisasterDefinition>();
         definitions.add(new DisasterDefinition("acid-rain", "Acid Rain", AcidRain.class, AcidRain::new));
         definitions.add(new DisasterDefinition("apocalypse", "Zombie Apocalypse", Apocalypse.class, Apocalypse::new));
         definitions.add(new DisasterDefinition("explosive-sheep", "Explosive Sheep", ExplosiveSheep.class, ExplosiveSheep::new));
@@ -97,6 +106,31 @@ public final class DisasterRegistry {
         definitions.add(new DisasterDefinition("disco", "Disco", Disco.class, Disco::new, Collections.<String>singleton("red-light-green-light")));
         definitions.add(new DisasterDefinition("red-light-green-light", "Red Light Green Light", RedLightGreenLight.class, RedLightGreenLight::new, Collections.<String>singleton("disco")));
         definitions.add(new DisasterDefinition("mirror-controls", "Mirror Controls", MirrorControls.class, MirrorControls::new));
+        return Collections.unmodifiableList(definitions);
+    }
+
+    private static Map<String, DisasterDefinition> buildDefinitionsById(final List<DisasterDefinition> definitions) {
+        final LinkedHashMap<String, DisasterDefinition> byId = new LinkedHashMap<String, DisasterDefinition>();
+        for (final DisasterDefinition definition : definitions) {
+            final String id = normalizeId(definition.getId());
+            final DisasterDefinition duplicate = byId.put(id, definition);
+            if (duplicate != null) {
+                throw new IllegalStateException("Duplicate disaster definition id: " + id);
+            }
+        }
+        for (final DisasterDefinition definition : definitions) {
+            for (final String incompatibleId : definition.getIncompatibleWith()) {
+                final String normalizedId = normalizeId(incompatibleId);
+                if (!byId.containsKey(normalizedId)) {
+                    throw new IllegalStateException("Disaster definition " + definition.getId() + " references unknown incompatible id: " + incompatibleId);
+                }
+            }
+        }
+        return Collections.unmodifiableMap(byId);
+    }
+
+    private static String normalizeId(final String id) {
+        return id.trim().toLowerCase(Locale.ROOT);
     }
 
     private DisasterRegistry() {
@@ -114,6 +148,21 @@ public final class DisasterRegistry {
             }
         }
         return null;
+    }
+
+    public static List<DisasterDefinition> allDefinitions() {
+        return DEFINITIONS;
+    }
+
+    public static Set<String> definitionIds() {
+        return DEFINITION_IDS;
+    }
+
+    public static Optional<DisasterDefinition> findDefinition(final String id) {
+        if (id == null || id.trim().isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(DEFINITIONS_BY_ID.get(normalizeId(id)));
     }
 
     public static void addRandomDisaster(Arena arena) {
@@ -134,7 +183,7 @@ public final class DisasterRegistry {
         }
 
         List<DisasterDefinition> available = new ArrayList<DisasterDefinition>();
-        for (DisasterDefinition def : definitions) {
+        for (DisasterDefinition def : DEFINITIONS) {
             if (!activeIds.contains(def.getId())
                 && DisasterSettings.isDisasterEnabled(arena, def.getId())
                 && Collections.disjoint(def.getIncompatibleWith(), activeIds)
@@ -156,7 +205,6 @@ public final class DisasterRegistry {
         ActiveDisaster active = new ActiveDisaster(
             definition,
             disaster,
-            0,
             DisasterSettings.durationSeconds(definition.getId()),
             DisasterSettings.maxTriggers(definition.getId())
         );
@@ -164,31 +212,12 @@ public final class DisasterRegistry {
         arena.getDisasters().add(disaster);
     }
 
-    public static void pulseAll(int time) {
+    public static void pulseAll() {
         for (Map.Entry<Arena, CopyOnWriteArrayList<ActiveDisaster>> entry : activeDisasters.entrySet()) {
-            Arena arena = entry.getKey();
-            CopyOnWriteArrayList<ActiveDisaster> list = entry.getValue();
-            for (ActiveDisaster wrapper : new ArrayList<ActiveDisaster>(list)) {
-                try {
-                    wrapper.getDisaster().pulse(time);
-                } catch (Exception e) {
-                    Disasters.getInstance().getLogger().severe("Error pulsing disaster " + wrapper.getDefinition().getId() + " in arena " + arena.getName() + ": " + e.getMessage());
-                }
-                wrapper.setElapsedSeconds(wrapper.getElapsedSeconds() + 1);
-
-                int triggerCap = wrapper.getMaxTriggers();
-                boolean triggered = wrapper.getDisaster() instanceof TriggerTrackedDisaster
-                    && ((TriggerTrackedDisaster) wrapper.getDisaster()).getTriggerCount() >= triggerCap
-                    && triggerCap > 0;
-                boolean durationReached = wrapper.getElapsedSeconds() >= wrapper.getDurationSeconds();
-
-                if (durationReached || triggered) {
-                    try {
-                        wrapper.getDisaster().stop(arena);
-                    } catch (Exception e) {
-                        Disasters.getInstance().getLogger().severe("Error stopping disaster " + wrapper.getDefinition().getId() + " in arena " + arena.getName() + ": " + e.getMessage());
-                    }
-                    arena.getDisasters().remove(wrapper.getDisaster());
+            final Arena arena = entry.getKey();
+            final CopyOnWriteArrayList<ActiveDisaster> list = entry.getValue();
+            for (final ActiveDisaster wrapper : new ArrayList<ActiveDisaster>(list)) {
+                if (pulseOne(arena, wrapper)) {
                     list.remove(wrapper);
                 }
             }
@@ -196,6 +225,32 @@ public final class DisasterRegistry {
                 activeDisasters.remove(arena, list);
             }
         }
+    }
+
+    static boolean pulseOne(final Arena arena, final ActiveDisaster wrapper) {
+        final int elapsed = wrapper.advanceSecond();
+        try {
+            wrapper.getDisaster().pulse(elapsed);
+        } catch (Exception e) {
+            Disasters.getInstance().getLogger().log(Level.SEVERE, "Error pulsing disaster " + wrapper.getDefinition().getId() + " in arena " + arena.getName() + ": " + e.getMessage(), e);
+        }
+
+        final int triggerCap = wrapper.getMaxTriggers();
+        final boolean triggered = wrapper.getDisaster() instanceof TriggerTrackedDisaster
+            && ((TriggerTrackedDisaster) wrapper.getDisaster()).getTriggerCount() >= triggerCap
+            && triggerCap > 0;
+        final boolean durationReached = elapsed >= wrapper.getDurationSeconds();
+
+        if (durationReached || triggered) {
+            try {
+                wrapper.getDisaster().stop(arena);
+            } catch (Exception e) {
+                Disasters.getInstance().getLogger().log(Level.SEVERE, "Error stopping disaster " + wrapper.getDefinition().getId() + " in arena " + arena.getName() + ": " + e.getMessage(), e);
+            }
+            arena.getDisasters().remove(wrapper.getDisaster());
+            return true;
+        }
+        return false;
     }
 
     public static void removeDisasters(Arena arena) {

@@ -39,7 +39,9 @@ enable-scoreboard: true
 # Active disaster scoreboard section.
 show-active-disasters: true
 
-# Game modifications are voted at match start and remain active for the full match.
+# Game modifications are selected by vote/default and remain active for the full match.
+# `default` is used only when no valid vote wins and allow-no-vote-default is true.
+# PvP is available to vote for when enabled in enabledisasters.yml, but is not active unless selected.
 game-modifications:
   voting:
     enabled: true
@@ -108,6 +110,20 @@ disasters:
     bat-swarm:
       duration-seconds: 35
       max-triggers: 0
+      # Bat counts apply per arena, not per player.
+      initial-count: 10
+      wave-count: 10
+      wave-interval-seconds: 8
+      # This cap includes living bats and prevents entity explosion.
+      max-alive-bats: 30
+      # More attempts trade one-time spawn CPU for a more reliable count.
+      spawn-attempts-per-bat: 12
+      spawn-horizontal-radius: 4.0
+      spawn-min-y-offset: 2.0
+      spawn-max-y-offset: 6.0
+      effect-radius: 4.0
+      blindness-duration-ticks: 60
+      slowness-duration-ticks: 60
     nuke:
       duration-seconds: 35
       max-triggers: 1

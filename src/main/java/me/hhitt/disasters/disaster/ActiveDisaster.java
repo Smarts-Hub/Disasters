@@ -10,13 +10,9 @@ public final class ActiveDisaster {
     private final int maxTriggers;
 
     public ActiveDisaster(final DisasterDefinition definition, final Disaster disaster, final int durationSeconds, final int maxTriggers) {
-        this(definition, disaster, 0, durationSeconds, maxTriggers);
-    }
-
-    public ActiveDisaster(final DisasterDefinition definition, final Disaster disaster, final int elapsedSeconds, final int durationSeconds, final int maxTriggers) {
         this.definition = Objects.requireNonNull(definition, "definition");
         this.disaster = Objects.requireNonNull(disaster, "disaster");
-        this.elapsedSeconds = elapsedSeconds;
+        this.elapsedSeconds = 0;
         this.durationSeconds = durationSeconds;
         this.maxTriggers = maxTriggers;
     }
@@ -33,8 +29,9 @@ public final class ActiveDisaster {
         return elapsedSeconds;
     }
 
-    public void setElapsedSeconds(final int elapsedSeconds) {
-        this.elapsedSeconds = elapsedSeconds;
+    public int advanceSecond() {
+        elapsedSeconds++;
+        return elapsedSeconds;
     }
 
     public int getDurationSeconds() {

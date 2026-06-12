@@ -53,24 +53,65 @@ public class GameSession {
         countdownTask = cd.runTaskTimer(plugin, 0, 20L);
     }
 
+    public ForceStartResult forceStartNow() {
+        if (arena.isEmpty()) {
+            return ForceStartResult.EMPTY;
+        }
+
+        final GameState state = arena.getState();
+        final List<String> selectedModificationIds;
+        switch (state) {
+            case LIVE:
+                return ForceStartResult.ALREADY_LIVE;
+            case RESTARTING:
+                return ForceStartResult.RESTARTING;
+            case RECRUITING:
+                arena.setState(GameState.COUNTDOWN);
+                try {
+                    arena.getResetService().save();
+                } catch (final RuntimeException ex) {
+                    arena.setState(GameState.RECRUITING);
+                    throw ex;
+                }
+                selectedModificationIds = GameModificationVoteManager.resolveDefaultSelection(arena);
+                break;
+            case COUNTDOWN:
+                selectedModificationIds = countdown != null
+                    ? countdown.resolveVoteNow()
+                    : GameModificationVoteManager.resolveDefaultSelection(arena);
+                break;
+            default:
+                return ForceStartResult.ALREADY_LIVE;
+        }
+
+        Notify.gameStart(arena);
+        startGameTimer(selectedModificationIds);
+        return ForceStartResult.STARTED;
+    }
+
     public void startGameTimer(final List<String> selectedModificationIds) {
         if (countdownTask != null) {
             countdownTask.cancel();
             countdownTask = null;
         }
+        if (timerTask != null) {
+            timerTask.cancel();
+            timerTask = null;
+        }
         if (countdown != null) {
             countdown.cancelVote();
         }
         countdown = null;
+        final List<String> selectedIds = selectedModificationIds != null
+            ? selectedModificationIds
+            : Collections.<String>emptyList();
         participantIds.clear();
         for (final Player player : arena.getPlaying()) {
             participantIds.add(player.getUniqueId());
         }
         arena.setState(GameState.LIVE);
         ItemDropManager.cleanOrphanedEntities(arena);
-        if (selectedModificationIds != null) {
-            GameModificationRegistry.start(arena, selectedModificationIds);
-        }
+        GameModificationRegistry.start(arena, selectedIds);
         final GameTimer timer = new GameTimer(arena, this);
         gameTimer = timer;
         timerTask = timer.runTaskTimer(plugin, 0, 20L);

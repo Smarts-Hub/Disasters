@@ -5,3 +5,10 @@ api-version: '1.21.8'
 authors: [hhitt]
 depend: [WorldEdit]
 softdepend: [Multiverse-Core, PlaceholderAPI]
+permissions:
+  disasters.admin:
+    default: op
+  disasters.forcestart:
+    default: op
+  disasters.forcestop:
+    default: op

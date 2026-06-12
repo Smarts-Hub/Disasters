@@ -10,7 +10,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public final class Msg {
 
@@ -42,11 +44,19 @@ public final class Msg {
     }
 
     public static void send(final CommandSender sender, final String path) {
-        sender.sendMessage(parse(getMsg(path)));
+        send(sender, path, Collections.<String, String>emptyMap());
+    }
+
+    public static void send(final CommandSender sender, final String path, final Map<String, String> replacements) {
+        sender.sendMessage(parse(applyReplacements(getMsg(path), replacements)));
     }
 
     public static void sendParsed(final Player player, final String msg) {
         player.sendMessage(parse(msg, player));
+    }
+
+    public static void sendParsed(final CommandSender sender, final String message) {
+        sender.sendMessage(parse(message));
     }
 
     public static void sendTitle(final Player player, final String title) {
@@ -76,5 +86,13 @@ public final class Msg {
         }
         final String message = lang.getString("messages." + path);
         return message != null ? message : "Message not found";
+    }
+
+    private static String applyReplacements(final String message, final Map<String, String> replacements) {
+        String text = message != null ? message : "";
+        for (final Map.Entry<String, String> entry : replacements.entrySet()) {
+            text = text.replace(entry.getKey(), entry.getValue());
+        }
+        return text;
     }
 }

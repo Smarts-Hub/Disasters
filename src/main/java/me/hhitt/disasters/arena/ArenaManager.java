@@ -160,6 +160,10 @@ public class ArenaManager {
                 plugin.getLogger().warning("Arena file " + arenaFile.getName() + " has invalid corner world, skipping.");
                 continue;
             }
+            if (!c1World.equals(c2World)) {
+                plugin.getLogger().warning("Arena file " + arenaFile.getName() + " has corners in different worlds, skipping.");
+                continue;
+            }
             final Location corner1 = new Location(
                 c1World,
                 arenaConfig.getDouble("corner1.x"),
@@ -173,6 +177,31 @@ public class ArenaManager {
                 arenaConfig.getDouble("corner2.z")
             );
 
+            final int minY = Math.min(corner1.getBlockY(), corner2.getBlockY());
+            final int maxY = Math.max(corner1.getBlockY(), corner2.getBlockY());
+            final int worldMinY = c1World.getMinHeight();
+            final int worldMaxY = c1World.getMaxHeight() - 1;
+            final int minAllowed = Math.max(minY, worldMinY);
+            final int maxAllowed = Math.min(maxY, worldMaxY);
+            if (minAllowed > maxAllowed) {
+                plugin.getLogger().warning("Arena file " + arenaFile.getName() + " has no valid Y intersection with world bounds, skipping.");
+                continue;
+            }
+
+            int lowestSpawnY = location.getBlockY();
+            for (final Location spawn : spawns) {
+                final World optionalSpawnWorld = spawn.getWorld();
+                if (optionalSpawnWorld == null || !optionalSpawnWorld.equals(c1World)) {
+                    plugin.getLogger().warning("Arena file " + arenaFile.getName() + " has optional spawn outside arena world, ignoring for disaster start Y.");
+                    continue;
+                }
+                lowestSpawnY = Math.min(lowestSpawnY, spawn.getBlockY());
+            }
+            final int automaticStartY = clamp(lowestSpawnY - 1, minAllowed, maxAllowed);
+            final int floodStartY = resolveStartY(arenaConfig, "disasters.flood.start-y", automaticStartY, minAllowed, maxAllowed, arenaID);
+            final int lavaRisingStartY = resolveStartY(arenaConfig, "disasters.lava-rising.start-y", automaticStartY, minAllowed, maxAllowed, arenaID);
+            final ArenaDisasterSettings disasterSettings = new ArenaDisasterSettings(floodStartY, lavaRisingStartY);
+
             final List<String> winnersCommands = arenaConfig.getStringList("winners-commands");
             final List<String> losersCommands = arenaConfig.getStringList("losers-commands");
             final List<String> toAllCommands = arenaConfig.getStringList("to-all-commands");
@@ -180,7 +209,7 @@ public class ArenaManager {
             final List<JumpPad> jumpPads = loadJumpPads(arenaConfig);
             final Arena arena = new Arena(arenaID, displayName, minPlayers, maxPlayers, aliveToEnd, gameTime, countdown,
                 disasterRate, maxDisasters, location, spawns, jumpPads, corner1, corner2, winnersCommands, losersCommands,
-                toAllCommands, worldEdit);
+                toAllCommands, disasterSettings, worldEdit);
 
             arenas.add(arena);
         }
@@ -188,6 +217,33 @@ public class ArenaManager {
 
     public List<Arena> getArenas() {
         return arenas;
+    }
+
+    private int resolveStartY(
+        final YamlConfiguration arenaConfig,
+        final String path,
+        final int automatic,
+        final int minAllowed,
+        final int maxAllowed,
+        final String arenaId
+    ) {
+        if (!arenaConfig.contains(path)) {
+            return automatic;
+        }
+        if (!arenaConfig.isInt(path)) {
+            plugin.getLogger().warning("Arena " + arenaId + " has non-integer " + path + ", using automatic start Y " + automatic + ".");
+            return automatic;
+        }
+        final int configured = arenaConfig.getInt(path);
+        final int clamped = clamp(configured, minAllowed, maxAllowed);
+        if (configured != clamped) {
+            plugin.getLogger().warning("Arena " + arenaId + " has " + path + " outside " + minAllowed + ".." + maxAllowed + ", clamped to " + clamped + ".");
+        }
+        return clamped;
+    }
+
+    private int clamp(final int value, final int min, final int max) {
+        return Math.max(min, Math.min(max, value));
     }
 
     public Arena getArena(final Player player) {
