@@ -69,6 +69,19 @@ corner2:
   world: world
 
 
+# Optional per-arena jump pads.
+# Players stepping on the configured block are launched upward and forward.
+jump-pads:
+  example-pad:
+    world: world
+    x: 0
+    y: 1
+    z: 0
+    power-y: 1.1
+    power-forward: 0.8
+    cooldown-ticks: 20
+
+
 # It will parse the placeholders to player, executed per one
 commands:
   # Executed one time per winner

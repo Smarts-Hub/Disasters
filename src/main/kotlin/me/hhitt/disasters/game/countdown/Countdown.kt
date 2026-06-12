@@ -3,36 +3,30 @@ package me.hhitt.disasters.game.countdown
 import me.hhitt.disasters.Disasters
 import me.hhitt.disasters.arena.Arena
 import me.hhitt.disasters.game.GameSession
-import me.hhitt.disasters.game.vote.VoteManager
+import me.hhitt.disasters.game.modification.GameModificationRegistry
+import me.hhitt.disasters.game.modification.vote.GameModificationVoteManager
 import me.hhitt.disasters.util.Notify
 import org.bukkit.scheduler.BukkitRunnable
-
-/**
- * The Countdown class is responsible for managing the countdown timer before the game starts.
- * It handles the countdown time, remaining time, and notifies players about the countdown status.
- *
- * @param arena The arena where the countdown is taking place.
- * @param session The game session associated with the arena.
- */
 
 class Countdown(private val arena: Arena, private val session: GameSession) : BukkitRunnable() {
 
     var time = 0
     var remaining = arena.countdown
-    private var voteManager: VoteManager? = null
+    private var voteManager: GameModificationVoteManager? = null
+    private var startingGame = false
 
     override fun run() {
         if (time >= arena.countdown) {
-            if(time >= (arena.countdown + 2)) {
+            if (time >= (arena.countdown + 2)) {
+                startingGame = true
                 Notify.gameStart(arena)
 
-                // Resolve vote BEFORE cancel() which clears voteManager
-                voteManager?.let { manager ->
-                    arena.gameMode = manager.resolveVote()
-                }
+                val selectedModifications = voteManager?.resolveVote().orEmpty()
+                GameModificationRegistry.start(arena, selectedModifications)
 
                 cancel()
                 session.startGameTimer()
+                return
             }
             time++
             return
@@ -43,12 +37,12 @@ class Countdown(private val arena: Arena, private val session: GameSession) : Bu
             return
         }
 
-        // Open vote GUI when 5 seconds remain in countdown
         if (time == 0 && voteManager == null) {
             val config = Disasters.getInstance().config
-            if (config.getBoolean("voting.enabled", true)) {
-                voteManager = VoteManager(arena)
-                voteManager?.startVote()
+            if (config.getBoolean("game-modifications.voting.enabled", true)) {
+                val manager = GameModificationVoteManager(arena)
+                manager.startVote()
+                voteManager = manager
             }
         }
 
@@ -59,8 +53,11 @@ class Countdown(private val arena: Arena, private val session: GameSession) : Bu
 
     override fun cancel() {
         super.cancel()
+        val wasStarting = startingGame
         voteManager = null
-        Notify.countdownCanceled(arena)
+        if (!wasStarting) {
+            Notify.countdownCanceled(arena)
+        }
         time = 0
         remaining = arena.countdown
     }

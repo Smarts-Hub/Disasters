@@ -7,8 +7,9 @@ import me.hhitt.disasters.arena.service.RespawnService
 import me.hhitt.disasters.disaster.Disaster
 import me.hhitt.disasters.disaster.impl.WorldBorder
 import me.hhitt.disasters.game.GameSession
-import me.hhitt.disasters.game.GameMode
 import me.hhitt.disasters.game.GameState
+import me.hhitt.disasters.game.modification.GameModification
+import me.hhitt.disasters.model.arena.JumpPad
 import me.hhitt.disasters.util.Lobby
 import me.hhitt.disasters.util.Notify
 import net.minecraft.network.protocol.game.ClientboundInitializeBorderPacket
@@ -48,6 +49,7 @@ class Arena(
     val maxDisasters: Int,
     val location: Location,
     val spawns: List<Location> = listOf(),
+    val jumpPads: List<JumpPad> = emptyList(),
     val corner1: Location,
     val corner2: Location,
     val winnersCommands: List<String>,
@@ -59,8 +61,7 @@ class Arena(
     val playing: MutableList<Player> = mutableListOf()
     val alive: MutableList<Player> = mutableListOf()
     val disasters: MutableList<Disaster> = mutableListOf()
-    var gameMode = GameMode.PVP
-    var disasterMultiplier = 1
+    val activeGameModifications: MutableList<GameModification> = mutableListOf()
     var state = GameState.RECRUITING
     val borderService = BorderService(corner1, corner2)
     val resetService = ResetArenaService(this, worldEdit)
@@ -95,7 +96,7 @@ class Arena(
     }
 
     fun removePlayer(player: Player) {
-        if(disasters.contains(WorldBorder())) {
+        if(disasters.any { it is WorldBorder }) {
             resetWorldBorder(player)
         }
         Lobby.teleportPlayer(player)
@@ -142,6 +143,7 @@ class Arena(
         playing.clear()
         alive.clear()
         disasters.clear()
+        activeGameModifications.clear()
     }
 
     fun getTimeLeft(): Int {

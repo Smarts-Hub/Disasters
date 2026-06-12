@@ -2,7 +2,9 @@ package me.hhitt.disasters.sidebar
 
 import fr.mrmicky.fastboard.adventure.FastBoard
 import me.hhitt.disasters.arena.Arena
+import me.hhitt.disasters.disaster.DisasterRegistry
 import me.hhitt.disasters.game.GameState
+import me.hhitt.disasters.game.modification.GameModificationRegistry
 import me.hhitt.disasters.storage.file.FileManager
 import me.hhitt.disasters.util.Msg
 import net.kyori.adventure.text.Component
@@ -55,15 +57,17 @@ class SidebarManager {
                 val lines = config.getStringList("live.lines")
                 val parsed = parseLines(lines, player).toMutableList()
 
-                // Append active disaster names if enabled in config
-                if (arena != null && mainConfig.getBoolean("show-active-disasters", false)) {
-                    val disasters = arena.disasters
-                    if (disasters.isNotEmpty()) {
+                if (arena != null && mainConfig.getBoolean("show-active-disasters", true)) {
+                    val disasters = DisasterRegistry.getActiveDisasterNames(arena)
+                    val modifications = GameModificationRegistry.displayNames(arena)
+                    if (disasters.isNotEmpty() || modifications.isNotEmpty()) {
                         parsed.add(Component.empty())
-                        parsed.add(Msg.parse("<gray>Disasters:", player))
-                        disasters.forEach { disaster ->
-                            val name = formatDisasterName(disaster::class.simpleName ?: "Unknown")
-                            parsed.add(Msg.parse("<green>  $name", player))
+                        parsed.add(Msg.parse("<gray>Active:", player))
+                        disasters.forEach { name ->
+                            parsed.add(Msg.parse("<red>  $name", player))
+                        }
+                        modifications.forEach { name ->
+                            parsed.add(Msg.parse("<aqua>  $name", player))
                         }
                     }
                 }
@@ -81,14 +85,6 @@ class SidebarManager {
                 board.updateLines(parseLines(lines, player))
             }
         }
-    }
-
-    /**
-     * Converts a class name like "MeteorShower" or "FloorIsLava" into a readable
-     * display name like "Meteor Shower" or "Floor Is Lava".
-     */
-    private fun formatDisasterName(className: String): String {
-        return className.replace(Regex("([a-z])([A-Z])"), "$1 $2")
     }
 
     private fun parseLines(lines: List<String>, player: Player): List<Component> {

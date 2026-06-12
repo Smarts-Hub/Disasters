@@ -104,19 +104,19 @@ disaster:
       - "<gold>----------------------------------"
       - "<red>Take cover!"
       - "<gold>----------------------------------"
-  one-hearth:
-    title: "<red>One Hearth!"
+  one-heart:
+    title: "<red>One Heart!"
     subtitle: "<red>Don't get hit!"
     chat:
       - "<gold>----------------------------------"
-      - "<red>One Hearth! Don't get hit!"
+      - "<red>One Heart! Don't get hit!"
       - "<gold>----------------------------------"
-  swap:
-    title: "<red>Swap!"
+  swapper:
+    title: "<red>Swapper!"
     subtitle: "<red>Switch places!"
     chat:
       - "<gold>----------------------------------"
-      - "<red>Swap! Switch places!"
+      - "<red>Swapper! Positions will swap!"
       - "<gold>----------------------------------"
   world-border:
     title: "<red>World Border!"
@@ -180,6 +180,132 @@ disaster:
     chat:
       - "<gold>----------------------------------"
       - "<red>Now players can kill u, pay attention!"
+      - "<gold>----------------------------------"
+  flood:
+    title: "<red>Flood!"
+    subtitle: "<red>Water is rising!"
+    chat:
+      - "<gold>----------------------------------"
+      - "<red>The arena is flooding!"
+      - "<gold>----------------------------------"
+  lava-rising:
+    title: "<red>Lava Rising!"
+    subtitle: "<red>Get to high ground!"
+    chat:
+      - "<gold>----------------------------------"
+      - "<red>Lava is rising!"
+      - "<gold>----------------------------------"
+  tnt-rain:
+    title: "<red>TNT Rain!"
+    subtitle: "<red>Take cover!"
+    chat:
+      - "<gold>----------------------------------"
+      - "<red>TNT is raining down!"
+      - "<gold>----------------------------------"
+  anvil-rain:
+    title: "<red>Anvil Rain!"
+    subtitle: "<red>Watch the sky!"
+    chat:
+      - "<gold>----------------------------------"
+      - "<red>Anvils are falling!"
+      - "<gold>----------------------------------"
+  tornado:
+    title: "<red>Tornado!"
+    subtitle: "<red>Hold on!"
+    chat:
+      - "<gold>----------------------------------"
+      - "<red>A tornado is sweeping the arena!"
+      - "<gold>----------------------------------"
+  simon-says:
+    title: "<red>Simon Says!"
+    subtitle: "<red>Follow the action!"
+    chat:
+      - "<gold>----------------------------------"
+      - "<red>Simon Says has started!"
+      - "<gold>----------------------------------"
+  hot-potato:
+    title: "<red>Hot Potato!"
+    subtitle: "<red>Pass it before it explodes!"
+    chat:
+      - "<gold>----------------------------------"
+      - "<red>Hot Potato has begun!"
+      - "<gold>----------------------------------"
+  sinkhole:
+    title: "<red>Sinkhole!"
+    subtitle: "<red>Watch your step!"
+    chat:
+      - "<gold>----------------------------------"
+      - "<red>Sinkholes are opening up!"
+      - "<gold>----------------------------------"
+  pillager-invasion:
+    title: "<red>Pillager Invasion!"
+    subtitle: "<red>Defend yourself!"
+    chat:
+      - "<gold>----------------------------------"
+      - "<red>Pillagers are invading!"
+      - "<gold>----------------------------------"
+  freeze:
+    title: "<red>Freeze!"
+    subtitle: "<red>Don't move!"
+    chat:
+      - "<gold>----------------------------------"
+      - "<red>Freeze has been activated!"
+      - "<gold>----------------------------------"
+  landmine:
+    title: "<red>Landmine!"
+    subtitle: "<red>Watch your step!"
+    chat:
+      - "<gold>----------------------------------"
+      - "<red>Landmines have been planted!"
+      - "<gold>----------------------------------"
+  size-change:
+    title: "<red>Size Change!"
+    subtitle: "<red>You feel different!"
+    chat:
+      - "<gold>----------------------------------"
+      - "<red>Size change has been activated!"
+      - "<gold>----------------------------------"
+  bat-swarm:
+    title: "<red>Bat Swarm!"
+    subtitle: "<red>Listen to the wings!"
+    chat:
+      - "<gold>----------------------------------"
+      - "<red>Bats are swarming!"
+      - "<gold>----------------------------------"
+  nuke:
+    title: "<red>Nuke!"
+    subtitle: "<red>Evacuate!"
+    chat:
+      - "<gold>----------------------------------"
+      - "<red>A nuke is inbound!"
+      - "<gold>----------------------------------"
+  covid-19:
+    title: "<red>Covid-19!"
+    subtitle: "<red>Stay away from the infected!"
+    chat:
+      - "<gold>----------------------------------"
+      - "<red>Covid-19 has spread!"
+      - "<gold>----------------------------------"
+  disco:
+    title: "<red>Disco!"
+    subtitle: "<red>Keep moving!"
+    chat:
+      - "<gold>----------------------------------"
+      - "<red>Disco has started!"
+      - "<gold>----------------------------------"
+  red-light-green-light:
+    title: "<red>Red Light, Green Light!"
+    subtitle: "<red>Freeze on red!"
+    chat:
+      - "<gold>----------------------------------"
+      - "<red>Red Light, Green Light has started!"
+      - "<gold>----------------------------------"
+  mirror-controls:
+    title: "<red>Mirror Controls!"
+    subtitle: "<red>Your controls are inverted!"
+    chat:
+      - "<gold>----------------------------------"
+      - "<red>Mirror Controls has been activated!"
       - "<gold>----------------------------------"
   disappear-blocks:
     title: "<red>Blocks disappear!"

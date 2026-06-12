@@ -2,23 +2,31 @@ package me.hhitt.disasters.disaster.impl
 
 import me.hhitt.disasters.arena.Arena
 import me.hhitt.disasters.disaster.Disaster
+import me.hhitt.disasters.service.DeathMessageService
 import me.hhitt.disasters.util.Notify
-
-import org.bukkit.Location
+import me.hhitt.disasters.util.SpawnLocationFinder
 import org.bukkit.Material
+import org.bukkit.attribute.Attribute
 import org.bukkit.block.Block
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
 import org.bukkit.entity.Zombie
 import org.bukkit.inventory.ItemStack
+import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.random.Random
 
 class Apocalypse : Disaster {
 
+    private enum class ZombieVariant(val weight: Int) {
+        NORMAL(55), SPEED(20), BOOMER(10), GIANT(5), JUMPER(10)
+    }
+
     private val arenas = CopyOnWriteArrayList<Arena>()
-    private val lastLocations = ConcurrentHashMap<Arena, ConcurrentHashMap<Zombie, Location>>()
+    private val lastLocations = ConcurrentHashMap<Arena, ConcurrentHashMap<Zombie, org.bukkit.Location>>()
+    private val boomers = ConcurrentHashMap<Arena, MutableSet<UUID>>()
+    private val jumpers = ConcurrentHashMap<Arena, MutableSet<UUID>>()
     private val startTimes = ConcurrentHashMap<Arena, Int>()
 
     companion object {
@@ -33,6 +41,8 @@ class Apocalypse : Disaster {
         arenas.add(arena)
         startTimes[arena] = 0
         lastLocations[arena] = ConcurrentHashMap()
+        boomers[arena] = mutableSetOf()
+        jumpers[arena] = mutableSetOf()
         Notify.disaster(arena, "apocalypse")
     }
 
@@ -41,15 +51,13 @@ class Apocalypse : Disaster {
             val elapsed = (startTimes[arena] ?: 0) + 1
             startTimes[arena] = elapsed
 
-            // Spawn rate ramp: fast early, slows down over time
             val shouldSpawn = when {
-                elapsed <= 20 -> elapsed % 2 == 0       // First 20s: 2 per player every 2 seconds
-                elapsed <= 120 -> elapsed % 5 == 0      // 20-120s: 2 per player every 5 seconds
-                else -> elapsed % 60 == 0               // After 120s: 2 per player every 60 seconds
+                elapsed <= 20 -> elapsed % 2 == 0
+                elapsed <= 120 -> elapsed % 5 == 0
+                else -> elapsed % 60 == 0
             }
 
             if (shouldSpawn) {
-                // Check alive zombie count before spawning
                 val zombieMap = lastLocations[arena] ?: return@forEach
                 val aliveCount = zombieMap.keys.count { !it.isDead }
                 if (aliveCount < MAX_ALIVE) {
@@ -59,7 +67,44 @@ class Apocalypse : Disaster {
                 }
             }
 
-            // Stuck detection every 5 seconds — directional block breaking toward nearest player
+            // Jumper behavior
+            jumpers[arena]?.toList()?.forEach { id ->
+                val zombie = org.bukkit.Bukkit.getEntity(id) as? Zombie
+                if (zombie == null || zombie.isDead) {
+                    jumpers[arena]?.remove(id)
+                    return@forEach
+                }
+                val target = arena.alive.minByOrNull { it.location.distanceSquared(zombie.location) } ?: return@forEach
+                val dx = target.location.x - zombie.location.x
+                val dz = target.location.z - zombie.location.z
+                val dist = kotlin.math.sqrt(dx * dx + dz * dz)
+                if (dist < 12.0 && elapsed % 5 == 0) {
+                    val vel = zombie.velocity
+                    vel.x = (dx / dist) * 0.4
+                    vel.z = (dz / dist) * 0.4
+                    vel.y = 1.0
+                    zombie.velocity = vel
+                }
+            }
+
+            // Boomer cleanup: if a boomer died, mark nearby players and explode
+            val boomerSet = boomers[arena] ?: return@forEach
+            boomerSet.toList().forEach { id ->
+                val zombie = org.bukkit.Bukkit.getEntity(id) as? Zombie
+                if (zombie == null || zombie.isDead) {
+                    val loc = zombie?.location
+                    if (loc != null) {
+                        arena.alive.toList().forEach { p ->
+                            if (p.location.distanceSquared(loc) <= 16.0) {
+                                DeathMessageService.mark(p, "apocalypse")
+                            }
+                        }
+                        loc.world.createExplosion(loc, 2f, false, true)
+                    }
+                    boomerSet.remove(id)
+                }
+            }
+
             if (time % STUCK_CHECK_INTERVAL == 0) {
                 val zombieMap = lastLocations[arena] ?: return@forEach
                 val deadZombies = mutableListOf<Zombie>()
@@ -69,11 +114,8 @@ class Apocalypse : Disaster {
                         deadZombies.add(zombie)
                         return@forEach
                     }
-
                     val currentLoc = zombie.location
-
                     if (lastLoc.distanceSquared(currentLoc) < 1.0) {
-                        // Find nearest player to break toward
                         val nearestPlayer = arena.alive.minByOrNull {
                             it.location.distanceSquared(zombie.location)
                         }
@@ -81,11 +123,8 @@ class Apocalypse : Disaster {
                             breakBlocksTowardTarget(zombie, nearestPlayer.location)
                         }
                     }
-
                     zombieMap[zombie] = currentLoc
                 }
-
-                // Clean up dead zombies from tracking
                 deadZombies.forEach { zombieMap.remove(it) }
             }
         }
@@ -94,110 +133,72 @@ class Apocalypse : Disaster {
     override fun stop(arena: Arena) {
         arenas.remove(arena)
         startTimes.remove(arena)
-
-        // Kill all zombies in the arena and clean up tracking
+        boomers.remove(arena)
+        jumpers.remove(arena)
         lastLocations.remove(arena)?.keys?.forEach { zombie ->
-            if (!zombie.isDead) {
-                zombie.remove()
-            }
+            if (!zombie.isDead) zombie.remove()
         }
     }
 
     private fun spawnZombiesNearPlayer(arena: Arena, player: Player, amount: Int) {
         val world = player.world
         val zombieMap = lastLocations[arena] ?: return
+        val boomerSet = boomers[arena] ?: return
+        val jumperSet = jumpers[arena] ?: return
         repeat(amount) {
-            val spawnLocation = findSafeSpawnLocation(player.location)
-            spawnLocation?.let {
-                val zombie = world.spawnEntity(it, EntityType.ZOMBIE) as Zombie
+            val spawnLocation = SpawnLocationFinder.findNearPlayer(arena, player.location, MIN_SPAWN_DISTANCE, SPAWN_RADIUS, Y_VARIATION)
+            val zombie = world.spawnEntity(spawnLocation, EntityType.ZOMBIE) as Zombie
 
-                // 1 in 20 chance for baby zombie
-                if (Random.nextInt(20) == 0) {
-                    zombie.setBaby()
+            val variant = pickVariant()
+            when (variant) {
+                ZombieVariant.NORMAL -> {
+                    if (Random.nextInt(20) == 0) zombie.setBaby()
+                    if (Random.nextBoolean()) zombie.equipment?.helmet = ItemStack(Material.LEATHER_HELMET)
                 }
-
-                // 50% chance for leather helmet (prevents burning in sunlight)
-                if (Random.nextBoolean()) {
+                ZombieVariant.SPEED -> {
+                    if (Random.nextInt(20) == 0) zombie.setBaby()
+                    zombie.getAttribute(Attribute.MOVEMENT_SPEED)?.baseValue = (zombie.getAttribute(Attribute.MOVEMENT_SPEED)?.baseValue ?: 0.23) * 1.6
                     zombie.equipment?.helmet = ItemStack(Material.LEATHER_HELMET)
                 }
-
-                // Track for stuck detection
-                zombieMap[zombie] = zombie.location
+                ZombieVariant.BOOMER -> {
+                    zombie.equipment?.helmet = ItemStack(Material.TNT)
+                    boomerSet.add(zombie.uniqueId)
+                }
+                ZombieVariant.GIANT -> {
+                    val scaleAttr = zombie.getAttribute(Attribute.SCALE)
+                    if (scaleAttr != null) {
+                        scaleAttr.baseValue = 2.0
+                    }
+                }
+                ZombieVariant.JUMPER -> {
+                    jumperSet.add(zombie.uniqueId)
+                }
             }
+
+            zombieMap[zombie] = zombie.location
         }
     }
 
-    private fun findSafeSpawnLocation(playerLocation: Location): Location? {
-        repeat(10) {
-            // Random angle for direction
-            val angle = Random.nextDouble(0.0, 2 * Math.PI)
-            // Random distance between min spawn distance and spawn radius
-            val distance = Random.nextDouble(MIN_SPAWN_DISTANCE.toDouble(), SPAWN_RADIUS.toDouble())
-
-            val randomX = playerLocation.x + Math.cos(angle) * distance
-            val randomZ = playerLocation.z + Math.sin(angle) * distance
-            // Random Y variation around player's Y level
-            val randomY = playerLocation.y + Random.nextInt(-Y_VARIATION, Y_VARIATION + 1)
-
-            // Find the nearest solid ground at or below the random Y
-            val groundY = findGroundY(playerLocation.world, randomX.toInt(), randomY.toInt(), randomZ.toInt())
-                ?: return@repeat
-
-            val potentialLocation = Location(playerLocation.world, randomX, groundY + 1.0, randomZ)
-
-            if (isSafeLocation(potentialLocation)) {
-                return potentialLocation
-            }
+    private fun pickVariant(): ZombieVariant {
+        val total = ZombieVariant.values().sumOf { it.weight }
+        var roll = Random.nextInt(total)
+        for (v in ZombieVariant.values()) {
+            roll -= v.weight
+            if (roll < 0) return v
         }
-        return null
+        return ZombieVariant.NORMAL
     }
 
-    /**
-     * Finds the nearest solid ground at or below the given Y.
-     * Returns null if no solid ground found within a reasonable range.
-     */
-    private fun findGroundY(world: org.bukkit.World, x: Int, startY: Int, z: Int): Double? {
-        for (y in startY downTo (startY - 10)) {
-            val block = world.getBlockAt(x, y, z)
-            val blockAbove = world.getBlockAt(x, y + 1, z)
-            if (block.type.isSolid && blockAbove.type == Material.AIR) {
-                return y.toDouble()
-            }
-        }
-        return null
-    }
-
-    private fun isSafeLocation(location: Location): Boolean {
-        val world = location.world
-        val block = world.getBlockAt(location)
-        val blockBelow = world.getBlockAt(location.clone().add(0.0, -1.0, 0.0))
-        val blockAbove = world.getBlockAt(location.clone().add(0.0, 1.0, 0.0))
-
-        return block.type == Material.AIR &&
-                blockAbove.type == Material.AIR &&
-                blockBelow.type.isSolid &&
-                blockBelow.type != Material.LAVA &&
-                blockBelow.type != Material.CACTUS
-    }
-
-    /**
-     * Breaks blocks in the direction toward a target location.
-     * Only breaks blocks at body and head height in front of the zombie, never below.
-     */
-    private fun breakBlocksTowardTarget(zombie: Zombie, target: Location) {
+    private fun breakBlocksTowardTarget(zombie: Zombie, target: org.bukkit.Location) {
         val zombieLoc = zombie.location
         val direction = target.toVector().subtract(zombieLoc.toVector()).normalize()
 
-        // Check 1-2 blocks ahead in the direction of the target at body and head height
         for (dist in 1..2) {
             val checkX = (zombieLoc.x + direction.x * dist).toInt()
             val checkZ = (zombieLoc.z + direction.z * dist).toInt()
-
-            // Body height and head height
             for (yOffset in 0..1) {
                 val checkY = zombieLoc.blockY + yOffset
                 val block: Block = zombieLoc.world.getBlockAt(checkX, checkY, checkZ)
-
                 if (block.type != Material.AIR && !block.isLiquid) {
                     block.type = Material.AIR
                 }

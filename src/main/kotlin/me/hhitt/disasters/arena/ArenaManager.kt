@@ -2,6 +2,7 @@ package me.hhitt.disasters.arena
 
 import com.sk89q.worldedit.bukkit.WorldEditPlugin
 import me.hhitt.disasters.Disasters
+import me.hhitt.disasters.model.arena.JumpPad
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.configuration.file.YamlConfiguration
@@ -38,6 +39,22 @@ class ArenaManager(private val worldEdit: WorldEditPlugin?) {
             plugin.getResource("example_arena.yml")?.use { inputStream ->
                 Files.copy(inputStream, arenaFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
             }
+        }
+    }
+
+    private fun loadJumpPads(arenaConfig: YamlConfiguration): List<JumpPad> {
+        val section = arenaConfig.getConfigurationSection("jump-pads") ?: return emptyList()
+        return section.getKeys(false).mapNotNull { id ->
+            val pad = section.getConfigurationSection(id) ?: return@mapNotNull null
+            val worldName = pad.getString("world") ?: return@mapNotNull null
+            val world = Bukkit.getWorld(worldName) ?: return@mapNotNull null
+            JumpPad(
+                id = id,
+                location = Location(world, pad.getDouble("x"), pad.getDouble("y"), pad.getDouble("z")),
+                powerY = pad.getDouble("power-y", 1.1),
+                powerForward = pad.getDouble("power-forward", 0.8),
+                cooldownTicks = pad.getLong("cooldown-ticks", 20L)
+            )
         }
     }
 
@@ -111,8 +128,9 @@ class ArenaManager(private val worldEdit: WorldEditPlugin?) {
             val losersCommands = arenaConfig.getStringList("losers-commands")
             val toAllCommands = arenaConfig.getStringList("to-all-commands")
 
+            val jumpPads = loadJumpPads(arenaConfig)
             val arena = Arena(arenaID, displayName, minPlayers, maxPlayers, aliveToEnd, gameTime, countdown, disasterRate,
-                maxDisasters, location, spawns, corner1, corner2, winnersCommands, losersCommands, toAllCommands, worldEdit)
+                maxDisasters, location, spawns, jumpPads, corner1, corner2, winnersCommands, losersCommands, toAllCommands, worldEdit)
 
             arenas.add(arena)
         }

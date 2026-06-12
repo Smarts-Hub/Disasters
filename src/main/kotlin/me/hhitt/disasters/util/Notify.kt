@@ -116,5 +116,9 @@ object Notify {
         }
     }
 
+    fun playerMessageRaw(player: Player, message: String) {
+        player.sendTitlePart(TitlePart.TITLE, Msg.parse(message, player))
+    }
+
 
 }

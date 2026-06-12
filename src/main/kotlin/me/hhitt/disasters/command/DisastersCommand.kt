@@ -26,6 +26,8 @@ class DisastersCommand(private val arenaManager: ArenaManager, private val sideb
     fun reload(actor: BukkitCommandActor) {
         FileManager.get("config")!!.reloadFile()
         FileManager.get("lang")!!.reloadFile()
+        FileManager.get("enabledisasters")!!.reloadFile()
+        FileManager.get("deadmessages")!!.reloadFile()
         arenaManager.reloadArenas()
         sidebarService.updateSidebar()
         ItemDropManager.loadConfig()

@@ -44,6 +44,10 @@ class Disasters : ZapperJavaPlugin() {
     }
 
     override fun onDisable() {
+        arenaManager.getArenas().forEach { arena ->
+            me.hhitt.disasters.game.modification.GameModificationRegistry.stop(arena)
+            me.hhitt.disasters.disaster.DisasterRegistry.removeDisasters(arena)
+        }
         ItemDropManager.clearAll()
     }
 
@@ -93,6 +97,8 @@ class Disasters : ZapperJavaPlugin() {
         server.pluginManager.registerEvents(HealthRegenListener(arenaManager), this)
         server.pluginManager.registerEvents(PlayerMoveListener(arenaManager), this)
         server.pluginManager.registerEvents(PlayerJumpListener(arenaManager), this)
+        server.pluginManager.registerEvents(JumpPadListener(arenaManager), this)
+        server.pluginManager.registerEvents(DisasterItemListener(arenaManager), this)
     }
 
     private fun initDisasters() {

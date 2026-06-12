@@ -25,10 +25,15 @@ object FileManager {
         updateConfigFile("config.yml")
         updateConfigFile("lang.yml")
         updateConfigFile("scoreboard.yml")
+        updateConfigFile("enabledisasters.yml")
+        updateConfigFile("deadmessages.yml")
+        updateConfigFile("item-drops.yml")
 
         load("config")
         load("lang")
         load("scoreboard")
+        load("enabledisasters")
+        load("deadmessages")
     }
 
     private fun load(name: String) {

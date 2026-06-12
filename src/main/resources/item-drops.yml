@@ -36,6 +36,7 @@ tiers:
       # -- Food --
       - COOKED_BEEF
       - MILK_BUCKET
+      - STONE_SWORD
       - POTION:FIRE_RESISTANCE
       #- COOKED_PORKCHOP
       #- COOKED_CHICKEN
@@ -65,6 +66,11 @@ tiers:
       - ENDER_PEARL
       - SHIELD
       - WATER_BUCKET
+      - LEATHER_HELMET
+      - LEATHER_CHESTPLATE
+      - LEATHER_LEGGINGS
+      - LEATHER_BOOTS
+      - TNT
       #- GOLDEN_CARROT
       #- RABBIT_STEW
       #- POTION:SWIFTNESS
@@ -85,6 +91,9 @@ tiers:
       # -- Powerful --
       - ENCHANTED_GOLDEN_APPLE
       - SPLASH_POTION:INSTANT_HEAL
+      - IRON_CHESTPLATE
+      - IRON_LEGGINGS
+      - DIAMOND_HELMET
       #- TOTEM_OF_UNDYING
       #- ELYTRA
       #- CHORUS_FRUIT

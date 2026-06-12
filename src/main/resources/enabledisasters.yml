@@ -1,0 +1,56 @@
+# Per-arena disaster and game-modification toggles.
+# `default` applies when an arena has no explicit section.
+# Set any id to false to disable it completely for that arena.
+
+default:
+  blacklist:
+    disasters:
+      - murder
+      - purge
+      - half-heart
+    game-modifications: []
+  disasters:
+    acid-rain: true
+    apocalypse: true
+    explosive-sheep: true
+    floor-is-lava: true
+    grounded: true
+    lightning: true
+    world-border: true
+    blind: true
+    cobweb: true
+    lag: true
+    zero-gravity: true
+    wither: true
+    hot-sun: true
+    disappear-blocks: true
+    meteor-shower: true
+    flood: true
+    lava-rising: true
+    tnt-rain: true
+    anvil-rain: true
+    tornado: true
+    simon-says: true
+    hot-potato: true
+    sinkhole: true
+    pillager-invasion: true
+    freeze: true
+    landmine: true
+    size-change: true
+    bat-swarm: true
+    nuke: true
+    covid-19: true
+    disco: true
+    red-light-green-light: true
+    mirror-controls: true
+  game-modifications:
+    one-heart: true
+    swapper: true
+
+arenas:
+  example_arena:
+    disasters: {}
+    game-modifications: {}
+
+# DO NOT TOUCH THIS!
+config-version: 1

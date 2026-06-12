@@ -25,6 +25,7 @@ import kotlin.random.Random
 object ItemDropManager {
 
     val DROP_KEY by lazy { NamespacedKey(Disasters.getInstance(), "disaster_drop") }
+    val SPECIAL_DROP_KEY by lazy { NamespacedKey(Disasters.getInstance(), "special_drop") }
 
     private val activeDrops = ConcurrentHashMap<Arena, CopyOnWriteArrayList<ItemDrop>>()
 
@@ -224,6 +225,20 @@ object ItemDropManager {
                 meta.basePotionType = entry.potionType
                 stack.itemMeta = meta
             }
+        }
+        val meta = stack.itemMeta
+        if (meta != null) {
+            when (entry.material) {
+                Material.TNT -> {
+                    meta.setDisplayName(net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText().serialize(Msg.parse("<red>Throwable TNT")))
+                    meta.persistentDataContainer.set(SPECIAL_DROP_KEY, PersistentDataType.BYTE, 1.toByte())
+                }
+                Material.WATER_BUCKET, Material.MILK_BUCKET -> {
+                    meta.persistentDataContainer.set(SPECIAL_DROP_KEY, PersistentDataType.BYTE, 1.toByte())
+                }
+                else -> {}
+            }
+            stack.itemMeta = meta
         }
         return stack
     }

@@ -35,14 +35,94 @@ bungee:
   server: "lobby"
 
 enable-scoreboard: true
-# Voting system settings
-voting:
-# Enable/disable the PvP vs PvE vote during countdown
-  enabled: true
-  # Enable/disable the disaster multiplier vote (1x-5x)
-  multiplier-enabled: true
-  
-show-active-disasters: false
+
+# Active disaster scoreboard section.
+show-active-disasters: true
+
+# Game modifications are voted at match start and remain active for the full match.
+game-modifications:
+  voting:
+    enabled: true
+    inventory-title: "<gold><bold>Vote Game Modification"
+    allow-no-vote-default: true
+    default: one-heart
+    open-at-countdown-start: true
+  swapper:
+    interval-seconds: 10
+  one-heart:
+    health: 2.0
+
+# Disaster runtime controls.
+disasters:
+  max-simultaneous-disasters: 4
+  default-duration-seconds: 60
+  default-max-triggers: 30
+  per-disaster:
+    lightning:
+      duration-seconds: 60
+      max-triggers: 30
+      warning-ticks: 20
+    apocalypse:
+      duration-seconds: 90
+      max-triggers: 30
+    flood:
+      duration-seconds: 90
+      max-triggers: 0
+      rise-interval-seconds: 4
+      max-blocks-per-pulse: 2500
+    lava-rising:
+      duration-seconds: 75
+      max-triggers: 0
+      rise-interval-seconds: 5
+      max-blocks-per-pulse: 2500
+    tnt-rain:
+      duration-seconds: 45
+      max-triggers: 30
+    anvil-rain:
+      duration-seconds: 45
+      max-triggers: 30
+    tornado:
+      duration-seconds: 45
+      max-triggers: 0
+    simon-says:
+      duration-seconds: 45
+      max-triggers: 8
+    hot-potato:
+      duration-seconds: 45
+      max-triggers: 3
+    sinkhole:
+      duration-seconds: 45
+      max-triggers: 12
+    pillager-invasion:
+      duration-seconds: 45
+      max-triggers: 3
+    freeze:
+      duration-seconds: 8
+      max-triggers: 1
+    landmine:
+      duration-seconds: 45
+      max-triggers: 30
+    size-change:
+      duration-seconds: 30
+      max-triggers: 1
+    bat-swarm:
+      duration-seconds: 35
+      max-triggers: 0
+    nuke:
+      duration-seconds: 35
+      max-triggers: 1
+    covid-19:
+      duration-seconds: 45
+      max-triggers: 1
+    disco:
+      duration-seconds: 45
+      max-triggers: 0
+    red-light-green-light:
+      duration-seconds: 45
+      max-triggers: 0
+    mirror-controls:
+      duration-seconds: 35
+      max-triggers: 0
 
 # Enable or disable item drops during games (configure drops in item-drops.yml)
 enable-item-drops: true
@@ -51,4 +131,4 @@ enable-item-drops: true
 hot-sun-damage: 0.5
 
 # DO NOT TOUCH THIS!
-config-version: 1
+config-version: 2
