@@ -23,7 +23,7 @@ public final class ArenaCommand {
     }
 
     @Subcommand("join <arena>")
-    public void join(final BukkitCommandActor actor, final Arena target) {
+    public void join(final BukkitCommandActor actor, final Arena arena) {
         if (!actor.isPlayer()) return;
         final Player player = actor.asPlayer();
 
@@ -32,8 +32,8 @@ public final class ArenaCommand {
             return;
         }
 
-        if (!target.addPlayer(player)) {
-            if (target.isFull()) {
+        if (!arena.addPlayer(player)) {
+            if (arena.isFull()) {
                 Msg.send(player, "arena-full");
             } else {
                 Msg.send(player, "arena-in-game");
@@ -104,25 +104,25 @@ public final class ArenaCommand {
     }
 
     @Subcommand("forcestart <arena>")
-    public void forceStart(final BukkitCommandActor actor, final Arena target) {
+    public void forceStart(final BukkitCommandActor actor, final Arena arena) {
         final CommandSender sender = actor.sender();
 
         if (!sender.hasPermission("disasters.forcestart")) {
             Msg.send(sender, "no-permission");
             return;
         }
-        sendForceStartResult(sender, target, target.forceStart());
+        sendForceStartResult(sender, arena, arena.forceStart());
     }
 
     @Subcommand("forcestop <arena>")
-    public void forceStop(final BukkitCommandActor actor, final Arena target) {
+    public void forceStop(final BukkitCommandActor actor, final Arena arena) {
         final CommandSender sender = actor.sender();
 
         if (!sender.hasPermission("disasters.forcestop")) {
             Msg.send(sender, "no-permission");
             return;
         }
-        target.stop();
+        arena.stop();
     }
 
     private void sendForceStartResult(final CommandSender sender, final Arena arena, final ForceStartResult result) {
