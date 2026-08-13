@@ -32,17 +32,18 @@ For more details, please refer to the full license text here:
 
 ## 🧑‍💻 Code Style
 
-This project is written in **Java** using Java 8-style syntax with a JDK 21 runtime target (required by Paper 1.21.8).
+This project targets **Paper 26.2** with **Java 25** bytecode.
 
-Please follow Java conventions for any contributions. Use Java 8-compatible language constructs — no records, sealed classes, pattern matching, switch expressions, text blocks, `var`, `List.of`, `Map.of`, or `Stream.toList`.
+Please follow Java conventions for any contributions.
 
-Build with the Maven wrapper:
+Build with system Maven:
 
 ```shell
-./mvnw clean verify
+mvn clean verify
+mvn clean install
 ```
 
-**Requirements:** JDK 21, Paper 1.21.8.
+**Requirements:** JDK 25+, Java bytecode release 25, Maven 3.9+, Paper 26.2, and a WorldEdit 7.4.5-compatible Paper build. WorldEdit is required because `plugin.yml` declares it as a hard dependency. PlaceholderAPI is optional.
 
 Do not add Gradle, Kotlin, or NMS code.
 

@@ -1,10 +1,17 @@
 name: Disasters
 version: '${project.version}'
 main: me.hhitt.disasters.Disasters
-api-version: '1.21.8'
+api-version: '26.2'
 authors: [hhitt]
 depend: [WorldEdit]
 softdepend: [Multiverse-Core, PlaceholderAPI]
+commands:
+  arena:
+    description: Arena player and moderation commands.
+    usage: /arena <join <arena>|quickjoin|leave|forcestart [arena]|forcestop [arena]>
+  disasters:
+    description: Disasters administration commands.
+    usage: /disasters <reload|setspawn|catalog <disasters|modifications>|config ...>
 permissions:
   disasters.admin:
     default: op

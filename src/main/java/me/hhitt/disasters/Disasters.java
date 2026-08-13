@@ -5,10 +5,6 @@ import me.hhitt.disasters.arena.Arena;
 import me.hhitt.disasters.arena.ArenaManager;
 import me.hhitt.disasters.command.ArenaCommand;
 import me.hhitt.disasters.command.DisastersCommand;
-import me.hhitt.disasters.command.parameter.ArenaParameterType;
-import me.hhitt.disasters.command.parameter.DisasterDefinitionParameterType;
-import me.hhitt.disasters.command.parameter.GameModificationDefinitionParameterType;
-import me.hhitt.disasters.disaster.DisasterDefinition;
 import me.hhitt.disasters.disaster.DisasterTask;
 import me.hhitt.disasters.game.FinishReason;
 import me.hhitt.disasters.game.drop.ItemDropManager;
@@ -34,11 +30,10 @@ import me.hhitt.disasters.storage.file.Configuration;
 import me.hhitt.disasters.storage.file.FileManager;
 import me.hhitt.disasters.util.Filer;
 import me.hhitt.disasters.util.Lobby;
+import org.bukkit.command.PluginCommand;
+import org.bukkit.command.TabExecutor;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import revxrsal.commands.Lamp;
-import revxrsal.commands.bukkit.BukkitLamp;
-import revxrsal.commands.bukkit.actor.BukkitCommandActor;
 
 public final class Disasters extends JavaPlugin {
 
@@ -119,13 +114,19 @@ public final class Disasters extends JavaPlugin {
 
     private void registerCommands() {
         final DefinitionToggleService definitionToggleService = new DefinitionToggleService();
-        final Lamp<BukkitCommandActor> lamp = BukkitLamp.builder(this)
-            .parameterTypes(builder -> builder
-                .addParameterType(Arena.class, new ArenaParameterType(arenaManager))
-                .addParameterType(DisasterDefinition.class, new DisasterDefinitionParameterType())
-                .addParameterType(GameModificationDefinition.class, new GameModificationDefinitionParameterType()))
-            .build();
-        lamp.register(new ArenaCommand(arenaManager), new DisastersCommand(arenaManager, sidebarService, definitionToggleService));
+        final ArenaCommand arenaCommand = new ArenaCommand(arenaManager);
+        final DisastersCommand disastersCommand = new DisastersCommand(arenaManager, sidebarService, definitionToggleService);
+        bindCommand("arena", arenaCommand);
+        bindCommand("disasters", disastersCommand);
+    }
+
+    private void bindCommand(final String name, final TabExecutor executor) {
+        final PluginCommand command = getCommand(name);
+        if (command == null) {
+            throw new IllegalStateException("Command /" + name + " is missing from plugin.yml");
+        }
+        command.setExecutor(executor);
+        command.setTabCompleter(executor);
     }
 
     private void registerListeners() {
