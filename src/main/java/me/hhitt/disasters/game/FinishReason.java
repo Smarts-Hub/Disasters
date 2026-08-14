@@ -2,7 +2,8 @@ package me.hhitt.disasters.game;
 
 public enum FinishReason {
 
-    COUNTDOWN_CANCELLED(false),
+    COUNTDOWN_BELOW_MINIMUM_PLAYERS(false),
+    COUNTDOWN_END_THRESHOLD_BLOCKED(false),
     TIME_LIMIT(true),
     ALIVE_THRESHOLD(true),
     ADMIN_STOP(true),

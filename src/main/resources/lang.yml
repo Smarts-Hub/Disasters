@@ -10,7 +10,8 @@ messages:
   no-available-arena: "<red>No available arena found!"
   reload-blocked-active-arenas: "<red>Cannot reload arenas while some arenas are still active!"
   force-start-success: "<green>Force-started arena %arena%!"
-  force-start-empty: "<red>Cannot force-start an empty arena!"
+  force-start-empty: "<red>Cannot force-start arena %arena%: no players are joined. At least one player must join first!"
+  force-start-insufficient-players: "<red>Cannot force-start arena %arena%: %current_players% player(s) are joined, but alive-to-end is %alive_to_end%. At least %required_players% players are required for a live game, or lower alive-to-end in the arena configuration."
   force-start-already-live: "<red>Arena %arena% is already live!"
   force-start-restarting: "<red>Arena %arena% is restarting!"
   catalog-disasters-header: "<gold>Disaster catalog:"
@@ -63,8 +64,15 @@ game-end:
   subtitle: "<rainbow>Thanks for playing!"
 
 countdown-canceled:
-  title: "<red>Countdown has been canceled!"
-  subtitle: "<red>Game will not start, please wait!"
+  not-enough-players:
+    title: "<red>Countdown canceled!"
+    subtitle: "<red>Need %min_players% players to start; only %current_players% remain."
+  end-threshold:
+    title: "<red>Countdown canceled!"
+    subtitle: "<red>Cannot start with %current_players% players while alive-to-end is %alive_to_end%. Need at least %required_players% players or lower alive-to-end."
+  admin-stop:
+    title: "<red>Countdown canceled!"
+    subtitle: "<red>An administrator stopped the countdown."
 
 disaster:
   acid-rain:

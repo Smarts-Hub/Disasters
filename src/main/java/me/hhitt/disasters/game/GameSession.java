@@ -53,6 +53,26 @@ public class GameSession {
         countdownTask = cd.runTaskTimer(plugin, 0, 20L);
     }
 
+    public boolean cancelCountdownIfBlocked() {
+        if (arena.getState() != GameState.COUNTDOWN) {
+            return false;
+        }
+        final StartBlockReason reason = StartBlockReason.forCountdown(
+            arena.getPlaying().size(),
+            arena.getMinPlayers(),
+            arena.getAliveToEnd()
+        );
+        if (reason == StartBlockReason.BELOW_MINIMUM_PLAYERS) {
+            finish(FinishReason.COUNTDOWN_BELOW_MINIMUM_PLAYERS);
+            return true;
+        }
+        if (reason == StartBlockReason.PLAYER_COUNT_AT_OR_BELOW_END_THRESHOLD) {
+            finish(FinishReason.COUNTDOWN_END_THRESHOLD_BLOCKED);
+            return true;
+        }
+        return false;
+    }
+
     public ForceStartResult forceStartNow() {
         if (arena.isEmpty()) {
             return ForceStartResult.EMPTY;
@@ -66,6 +86,9 @@ public class GameSession {
             case RESTARTING:
                 return ForceStartResult.RESTARTING;
             case RECRUITING:
+                if (StartBlockReason.forForceStart(arena.getPlaying().size(), arena.getAliveToEnd()) == StartBlockReason.PLAYER_COUNT_AT_OR_BELOW_END_THRESHOLD) {
+                    return ForceStartResult.INSUFFICIENT_PLAYERS_FOR_END_THRESHOLD;
+                }
                 arena.setState(GameState.COUNTDOWN);
                 try {
                     arena.getResetService().save();
@@ -76,6 +99,9 @@ public class GameSession {
                 selectedModificationIds = GameModificationVoteManager.resolveDefaultSelection(arena);
                 break;
             case COUNTDOWN:
+                if (StartBlockReason.forForceStart(arena.getPlaying().size(), arena.getAliveToEnd()) == StartBlockReason.PLAYER_COUNT_AT_OR_BELOW_END_THRESHOLD) {
+                    return ForceStartResult.INSUFFICIENT_PLAYERS_FOR_END_THRESHOLD;
+                }
                 selectedModificationIds = countdown != null
                     ? countdown.resolveVoteNow()
                     : GameModificationVoteManager.resolveDefaultSelection(arena);
@@ -142,8 +168,24 @@ public class GameSession {
             countdown = null;
             gameTimer = null;
 
-            if (previousState == GameState.COUNTDOWN && reason != FinishReason.PLUGIN_DISABLE) {
-                Notify.countdownCanceled(arena);
+            if (previousState == GameState.COUNTDOWN) {
+                switch (reason) {
+                    case COUNTDOWN_BELOW_MINIMUM_PLAYERS:
+                        Notify.countdownCanceledNotEnoughPlayers(arena);
+                        break;
+                    case COUNTDOWN_END_THRESHOLD_BLOCKED:
+                        Notify.countdownCanceledEndThreshold(arena);
+                        break;
+                    case ADMIN_STOP:
+                        Notify.countdownCanceledByAdmin(arena);
+                        break;
+                    case PLUGIN_DISABLE:
+                        break;
+                    default:
+                        plugin.getLogger().log(Level.WARNING,
+                            "Unexpected finish reason " + reason + " while countdown in arena " + arena.getName());
+                        break;
+                }
                 ItemDropManager.clearDrops(arena);
                 GameModificationRegistry.stop(arena);
                 DisasterRegistry.removeDisasters(arena);

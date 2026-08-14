@@ -7,7 +7,9 @@ import net.kyori.adventure.title.TitlePart;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public final class Notify {
@@ -24,10 +26,33 @@ public final class Notify {
         sound(arena, Sound.ENTITY_PLAYER_LEVELUP);
     }
 
-    public static void countdownCanceled(final Arena arena) {
+    public static void countdownCanceledNotEnoughPlayers(final Arena arena) {
+        final Map<String, String> replacements = new HashMap<>();
+        replacements.put("%current_players%", Integer.toString(arena.getPlaying().size()));
+        replacements.put("%min_players%", Integer.toString(arena.getMinPlayers()));
+        countdownCanceled(arena, "countdown-canceled.not-enough-players", replacements);
+    }
+
+    public static void countdownCanceledEndThreshold(final Arena arena) {
+        final Map<String, String> replacements = new HashMap<>();
+        replacements.put("%current_players%", Integer.toString(arena.getPlaying().size()));
+        replacements.put("%alive_to_end%", Integer.toString(arena.getAliveToEnd()));
+        replacements.put("%required_players%", Integer.toString(arena.getAliveToEnd() + 1));
+        countdownCanceled(arena, "countdown-canceled.end-threshold", replacements);
+    }
+
+    public static void countdownCanceledByAdmin(final Arena arena) {
+        countdownCanceled(arena, "countdown-canceled.admin-stop", new HashMap<String, String>());
+    }
+
+    private static void countdownCanceled(final Arena arena, final String path, final Map<String, String> replacements) {
         final Configuration config = config();
-        final String title = config.getString("countdown-canceled.title", "");
-        final String subtitle = config.getString("countdown-canceled.subtitle", "");
+        String title = config.getString(path + ".title", "");
+        String subtitle = config.getString(path + ".subtitle", "");
+        for (final Map.Entry<String, String> entry : replacements.entrySet()) {
+            title = title.replace(entry.getKey(), entry.getValue());
+            subtitle = subtitle.replace(entry.getKey(), entry.getValue());
+        }
         sendTitleToArena(arena, title, subtitle);
         sound(arena, Sound.BLOCK_NOTE_BLOCK_BASS);
     }

@@ -212,13 +212,19 @@ public final class ArenaCommand implements TabExecutor {
             case RESTARTING:
                 path = "force-start-restarting";
                 break;
-            default:
-                path = "force-start-restarting";
+            case INSUFFICIENT_PLAYERS_FOR_END_THRESHOLD:
+                path = "force-start-insufficient-players";
                 break;
+            default:
+                throw new IllegalStateException("Unhandled force-start result: " + result);
         }
 
         final Map<String, String> replacements = new HashMap<String, String>();
         replacements.put("%arena%", arena.getName());
+        replacements.put("%current_players%", String.valueOf(arena.getPlaying().size()));
+        replacements.put("%min_players%", String.valueOf(arena.getMinPlayers()));
+        replacements.put("%alive_to_end%", String.valueOf(arena.getAliveToEnd()));
+        replacements.put("%required_players%", String.valueOf(arena.getAliveToEnd() + 1));
         Msg.send(sender, path, replacements);
     }
 }

@@ -259,10 +259,10 @@ public final class Arena {
         Lobby.teleportPlayer(player);
         playing.remove(player);
         alive.remove(player);
-        if (isWaiting()) {
-            if (playing.size() < minPlayers) {
-                stop();
-            }
+        if (state == GameState.COUNTDOWN) {
+            gameSession.cancelCountdownIfBlocked();
+        } else if (state == GameState.RECRUITING && playing.size() < minPlayers) {
+            stop();
         } else {
             if (alive.size() < aliveToEnd) {
                 stop();

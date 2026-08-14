@@ -1,7 +1,6 @@
 package me.hhitt.disasters.game.countdown;
 
 import me.hhitt.disasters.arena.Arena;
-import me.hhitt.disasters.game.FinishReason;
 import me.hhitt.disasters.game.GameSession;
 import me.hhitt.disasters.game.modification.vote.GameModificationVoteManager;
 import me.hhitt.disasters.storage.file.FileManager;
@@ -41,6 +40,10 @@ public final class Countdown extends BukkitRunnable {
 
     @Override
     public void run() {
+        if (session.cancelCountdownIfBlocked()) {
+            return;
+        }
+
         if (time >= arena.getCountdown()) {
             if (time >= (arena.getCountdown() + 2)) {
                 Notify.gameStart(arena);
@@ -49,11 +52,6 @@ public final class Countdown extends BukkitRunnable {
                 return;
             }
             time++;
-            return;
-        }
-
-        if (arena.getAlive().size() <= arena.getAliveToEnd()) {
-            session.finish(FinishReason.COUNTDOWN_CANCELLED);
             return;
         }
 

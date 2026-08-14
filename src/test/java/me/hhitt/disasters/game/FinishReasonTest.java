@@ -22,8 +22,13 @@ class FinishReasonTest {
     }
 
     @Test
-    void shouldNotRecordOutcomeForCountdownCancelled() {
-        assertFalse(FinishReason.COUNTDOWN_CANCELLED.shouldRecordOutcome());
+    void shouldNotRecordOutcomeForCountdownBelowMinimumPlayers() {
+        assertFalse(FinishReason.COUNTDOWN_BELOW_MINIMUM_PLAYERS.shouldRecordOutcome());
+    }
+
+    @Test
+    void shouldNotRecordOutcomeForCountdownEndThresholdBlocked() {
+        assertFalse(FinishReason.COUNTDOWN_END_THRESHOLD_BLOCKED.shouldRecordOutcome());
     }
 
     @Test

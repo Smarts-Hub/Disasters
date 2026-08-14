@@ -6,9 +6,14 @@
 max-players: 10
 
 # min-players refers to the minimum number of players required to start the arena.
+# min-players controls normal automatic countdown eligibility.
+# force-start may bypass min-players.
 min-players: 2
 
 # alive-to-end refers to the number of players that need to be alive for the arena to end.
+# alive-to-end is the LIVE ending threshold.
+# A match needs at least alive-to-end + 1 joined players to be playable.
+# For normal starts, configure min-players > alive-to-end.
 alive-to-end: 1
 
 # countdown refers to the number of seconds before the arena starts, after the minimum number of players have joined.
